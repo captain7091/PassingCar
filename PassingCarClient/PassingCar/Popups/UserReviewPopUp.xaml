@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mopups:PopupPage
+   xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+   xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+   xmlns:controls="clr-namespace:PassingCar.Controls"
+   xmlns:utils="clr-namespace:PassingCar.Utils"
+   xmlns:markups="clr-namespace:PassingCar;assembly=PassingCar"
+   xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+   xmlns:mopupsanim="clr-namespace:Mopups.Animations;assembly=Mopups"
+   xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    
+           x:Class="PassingCar.Popups.UserReviewPopUp"
+           xmlns:local="clr-namespace:PassingCar.Extensions"
+           
+           >
+    <utils:NeatFrame
+                   HorizontalOptions="EndAndExpand"              
+                   Padding="0" Margin="0,10,10,0" CornerRadius="25"
+                   BorderColor="Transparent"
+                   BackgroundColor="Transparent">
+        <Image
+                    x:Name="menu_context"                   
+                    Margin="0, 0, 0, 0"
+                    HorizontalOptions="CenterAndExpand"
+                    VerticalOptions="CenterAndExpand"
+                    BackgroundColor="Transparent"
+                    Source="{local:EmbeddedImage fileName=x-symbol.png}"
+                    HeightRequest="15"
+                    Aspect="AspectFit"
+                    >
+        </Image>
+        <utils:NeatFrame.GestureRecognizers>
+            <TapGestureRecognizer
+                             Tapped="Close_PopUp"
+                             NumberOfTapsRequired="1" />
+        </utils:NeatFrame.GestureRecognizers>
+    </utils:NeatFrame>
+</mopups:PopupPage>

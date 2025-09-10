@@ -1,0 +1,425 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PassingCar.Extensions"
+             xmlns:behaviors="clr-namespace:PassingCar.Extensions.Behaviors"
+             xmlns:xct="http://xamarin.com/schemas/2020/toolkit" xmlns:utils="clr-namespace:PassingCar.Utils"
+             xmlns:markups="clr-namespace:PassingCar;assembly=PassingCar"
+             x:Class="PassingCar.Views.PaymentPage" 
+             BackgroundColor="White">
+    <ContentPage.Content>
+        <AbsoluteLayout BackgroundColor="Transparent" x:Name="paymentpage">
+            <utils:NeatFrame
+               AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
+               BorderColor="Transparent"
+               CornerRadius="15"
+               VerticalOptions="CenterAndExpand"
+               HorizontalOptions="CenterAndExpand">
+                <StackLayout>
+                    <StackLayout VerticalOptions="CenterAndExpand"
+                         Margin="25,20,25,0"
+                         HorizontalOptions="CenterAndExpand"
+                         Orientation="Vertical">
+                        <Label                        
+                    Margin="0,0,0,0"
+                    HorizontalOptions="CenterAndExpand"
+                    VerticalOptions="CenterAndExpand"
+                    Text="Your don't have Credit card saved:"
+                    FontSize="{markups:OnScreenSize DefaultSize='16' , Small='14', Medium='14',  ExtraSmall='12'}"
+                    FontFamily="RajSemiBold"
+                    BackgroundColor="Transparent"                          
+                >
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span                          
+                            FontFamily="RajSemiBold"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            Text="Tienes una " TextColor="#44394a"/>
+                                    <Span 
+                            FontFamily="RajSemiBold"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            Text="tarjeta de crédito" TextColor="#f81a21"/>
+                                    <Span                          
+                            FontFamily="RajSemiBold"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            Text=" guardada:: " TextColor="#44394a"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <utils:NeatFrame BackgroundColor="LightGray"
+                       CornerRadius="20"
+                       Padding="0,15"
+                       Margin="30,10,30,0">
+                            <Grid ColumnDefinitions="Auto,Auto"
+                                  ColumnSpacing="10"
+                                 HorizontalOptions="Center">
+                                <Image 
+                            Margin="0,0,0,0"
+                            Source="{local:EmbeddedImage fileName=card.png}"
+                            HeightRequest="20"
+                            Aspect="AspectFit"
+                            HorizontalOptions="CenterAndExpand"
+                            BackgroundColor="Transparent">
+                                </Image>
+                                <Label 
+                                 Grid.Column="1"
+                            HorizontalTextAlignment="Start"
+                            FontFamily="RajSemiBold"
+                            HorizontalOptions="CenterAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Margin="0, 0, 0, 0"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            Text="65xx - xxxx - xxxx - xx26 "
+                        />
+                            </Grid>
+                        </utils:NeatFrame>
+
+                        <StackLayout Orientation="Horizontal"
+                             Margin="0,20,0,10"
+                             HorizontalOptions="CenterAndExpand">
+                            <Image 
+                            Margin="0,0,0,0"
+                            Source="{local:EmbeddedImage fileName=line_range.png}"
+                            HeightRequest="1"
+                            Aspect="AspectFit"
+                            HorizontalOptions="CenterAndExpand"
+                            BackgroundColor="Transparent">
+                            </Image>
+                            <Label                            
+                            HorizontalTextAlignment="Start"
+                            FontFamily="RajSemiBold"
+                            HorizontalOptions="CenterAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Margin="0, 0, 0, 0"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            Text=" or "
+                        />
+                            <Image 
+                            Margin="0,0,0,0"
+                            Source="{local:EmbeddedImage fileName=line_range.png}"
+                            HeightRequest="1"
+                            Aspect="AspectFit"
+                            HorizontalOptions="CenterAndExpand"
+                            BackgroundColor="Transparent">
+                            </Image>
+                        </StackLayout>
+
+                        <Image 
+                     Margin="0,0,0,0"
+                     Source="{local:EmbeddedImage fileName=credit_card.png}"
+                     HeightRequest="150"
+                     Aspect="AspectFit"
+                     VerticalOptions="CenterAndExpand"
+                     BackgroundColor="Transparent">
+                        </Image>
+
+                        <StackLayout HorizontalOptions="CenterAndExpand" Orientation="Horizontal"
+                                Spacing="5" >
+                            <Label
+                        x:Name="amount_head"
+                        Margin="0,20,0,20"
+                        VerticalOptions="CenterAndExpand"
+                        Text="Total a pagar:"
+                        TextColor="#FE3F40"
+                        FontSize="{markups:OnScreenSize DefaultSize='16' , Small='14', Medium='14',  ExtraSmall='12'}"
+                        FontFamily="RajBold"
+                        BackgroundColor="Transparent"                          
+                        >
+                            </Label>
+                            <Label
+                        x:Name="amount_value"
+                        Margin="0,20,0,20"
+                        VerticalOptions="CenterAndExpand"
+                        Text="{Binding AmountPay}"
+                        FontSize="{markups:OnScreenSize DefaultSize='16' , Small='14', Medium='14',  ExtraSmall='12'}"
+                        FontFamily="RajBold"
+                        BackgroundColor="Transparent"                          
+                        >
+                            </Label>
+                            <Label
+                        x:Name="amount_euro"
+                        Margin="0,20,0,20"
+                        VerticalOptions="CenterAndExpand"
+                        Text="€"
+                        FontSize="{markups:OnScreenSize DefaultSize='16' , Small='14', Medium='14',  ExtraSmall='12'}"
+                        FontFamily="RajBold"
+                        BackgroundColor="Transparent"                          
+                        >
+                            </Label>
+                        </StackLayout>
+
+                        <StackLayout Orientation="Vertical"
+                             Spacing="0"
+                             HorizontalOptions="FillAndExpand">
+                            <Label
+                        x:Name="payment_cardnumber_head"
+                        Margin="0,0,0,0"
+                        HorizontalOptions="StartAndExpand"
+                        VerticalOptions="CenterAndExpand"
+                        Text="Número de tarjeta (Cuenta):"
+                        FontSize="{markups:OnScreenSize DefaultSize='12' , Small='10', Medium='10',  ExtraSmall='10'}"
+                        FontFamily="RajBold"
+                        BackgroundColor="Transparent"                          
+                    >
+                            </Label>
+                            <StackLayout Orientation="Horizontal"
+                                 HorizontalOptions="FillAndExpand">
+                                <Image 
+                            Margin="0,0,0,0"
+                            Source="{local:EmbeddedImage fileName=card.png}"
+                            HeightRequest="20"
+                            Aspect="AspectFit"
+                            HorizontalOptions="Start"
+                            BackgroundColor="Transparent">
+                                </Image>
+                                <Entry
+                            Keyboard="Numeric"
+                            x:Name="payment_cardnumber"
+                            Placeholder="55xx xxxx xxxx xx53" 
+                            HorizontalTextAlignment="Start"
+                            FontFamily="RajSemiBold"
+                            WidthRequest="200"
+                            HorizontalOptions="StartAndExpand"
+                            Margin="0, 0, 0, 0"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            Text="{Binding CardNumber}"
+                        >
+                                    <Entry.Behaviors>
+                                        <behaviors:CardNumberValidator x:Name="cardnumber_validator"/>
+                                    </Entry.Behaviors>
+                                    <!--<VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Valid">
+                                                <VisualState.Setters>
+                                                    <Setter Property="TextColor" Value="Gray"/>
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                            <VisualState x:Name="Invalid">
+                                                <VisualState.Setters>
+                                                    <Setter Property="TextColor" Value="IndianRed"/>
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>-->
+                                </Entry>
+                            </StackLayout>
+
+                            <Grid ColumnSpacing="0" RowSpacing="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Label
+                            x:Name="payment_name_head"
+                            Grid.Row="0" Grid.Column="0"
+                            Margin="0,10,0,0"
+                            HorizontalOptions="StartAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Text="Tu nombre:"
+                            FontSize="{markups:OnScreenSize DefaultSize='12' , Small='10', Medium='10',  ExtraSmall='10'}"
+                            FontFamily="RajBold"
+                            BackgroundColor="Transparent"                          
+                        >
+                                </Label>
+                                <Entry
+                            x:Name="payment_name"
+                            Grid.Row="1" Grid.Column="0"
+                            Placeholder="Diaxxx Ixxxxxx" 
+                            HorizontalTextAlignment="Start"
+                            Keyboard="Text"
+                            FontFamily="RajSemiBold"
+                            WidthRequest="150"
+                            HorizontalOptions="StartAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Margin="0, 0, 0, 0"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            Text="{Binding Name}"
+                        />
+                                <Label
+                            x:Name="payment_expirationdate_head"
+                            Grid.Row="0" Grid.Column="1"
+                            Margin="0,10,0,0"
+                            HorizontalOptions="CenterAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Text="Fecha de Caducidad:"
+                            FontSize="{markups:OnScreenSize DefaultSize='12' , Small='10', Medium='10',  ExtraSmall='10'}"
+                            FontFamily="RajBold"
+                            BackgroundColor="Transparent"                          
+                        >
+                                </Label>
+                                <StackLayout 
+                            Grid.Row="1" Grid.Column="1"
+                            Orientation="Horizontal">
+                                    <Entry
+                                x:Name="payment_expirationdate"
+                                Placeholder="0x"
+                                Keyboard="Numeric"
+                                HorizontalTextAlignment="Start"
+                                FontFamily="RajSemiBold"
+                                WidthRequest="30"
+                                HorizontalOptions="EndAndExpand"
+                                VerticalOptions="CenterAndExpand"
+                                Margin="0, 0, 0, 0"
+                                FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                                Text="{Binding Name}"
+                            >
+                                        <Entry.Behaviors>
+                                            <behaviors:CardExpDateValidator x:Name="expirationadate_validator"/>
+                                        </Entry.Behaviors>
+                                        <!--<VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Valid">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="TextColor" Value="Gray"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Invalid">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="TextColor" Value="IndianRed"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>-->
+                                    </Entry>
+                                    <Label
+                                Margin="0,0,0,0"
+                                HorizontalOptions="Center"
+                                VerticalOptions="CenterAndExpand"
+                                Text="/"
+                                FontSize="{markups:OnScreenSize DefaultSize='12' , Small='10', Medium='10',  ExtraSmall='10'}"
+                                FontFamily="RajBold"
+                                BackgroundColor="Transparent"                          
+                            >
+                                    </Label>
+                                    <Entry  
+                                x:Name="payment_card_year"
+                                Placeholder="20xx" 
+                                Keyboard="Numeric"
+                                HorizontalTextAlignment="Start"
+                                FontFamily="RajSemiBold"
+                                WidthRequest="40"
+                                HorizontalOptions="StartAndExpand"
+                                VerticalOptions="CenterAndExpand"
+                                Margin="0, 0, 0, 0"
+                                FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                                Text="{Binding Name}"
+                            />
+                                </StackLayout>
+                                <StackLayout Grid.Row="2" Grid.Column="0"
+                                     Orientation="Horizontal">
+                                    <Label
+                                x:Name="payment_cvc_head"
+                                Margin="0,0,0,0"
+                                HorizontalOptions="EndAndExpand"
+                                VerticalOptions="CenterAndExpand"
+                                Text="CVC: "
+                                FontSize="{markups:OnScreenSize DefaultSize='12' , Small='10', Medium='10',  ExtraSmall='10'}"
+                                FontFamily="RajBold"
+                                BackgroundColor="Transparent"                          
+                            >
+                                    </Label>
+                                    <Entry   
+                                x:Name="payment_cvc"        
+                                Placeholder="xxx" 
+                                Keyboard="Numeric"
+                                HorizontalTextAlignment="Start"
+                                FontFamily="RajSemiBold"
+                                WidthRequest="30"
+                                HorizontalOptions="StartAndExpand"
+                                VerticalOptions="CenterAndExpand"
+                                Margin="0, 0, 0, 0"
+                                FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                                Text="{Binding Name}"
+                            >
+                                        <Entry.Behaviors>
+                                            <behaviors:CardCVCValidator x:Name="cvc_validator"/>
+                                        </Entry.Behaviors>
+                                        <!--<VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Valid">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="TextColor" Value="Gray"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Invalid">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="TextColor" Value="IndianRed"/>
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>-->
+                                    </Entry>
+                                </StackLayout>
+                            </Grid>
+                            <StackLayout Orientation="Horizontal"
+                                     Margin="0,10,0,10">
+                                <CheckBox IsChecked="False">
+                                </CheckBox>
+                                <Label                                         
+                                Margin="0,0,0,0"
+                                HorizontalOptions="Start"
+                                VerticalOptions="CenterAndExpand"
+                                Text="Guarda esta Tarjeta de Crédito"
+                                FontSize="{markups:OnScreenSize DefaultSize='12' , Small='10', Medium='10',  ExtraSmall='10'}"
+                                FontFamily="RajBold"
+                                BackgroundColor="Transparent"                          
+                            >
+                                </Label>
+                            </StackLayout>
+                        </StackLayout>
+                        <Button                            
+                            Margin="0, 20, 0, 20"
+                            WidthRequest="150"
+                            Text="Pagar"
+                            TextColor="White"
+                            CharacterSpacing="0"
+                            FontFamily="RajSemiBold"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            CornerRadius="15"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            BackgroundColor="#FE3F40"
+                            HeightRequest="35"
+                            Clicked="Pay"
+                            >
+                        </Button>
+                    </StackLayout>
+                </StackLayout>
+            </utils:NeatFrame>
+            <utils:NeatFrame AbsoluteLayout.LayoutBounds="0,0,0.13,0.08" AbsoluteLayout.LayoutFlags="All"
+                   Padding="0" Margin="0" CornerRadius="25"
+                   BorderColor="Transparent"
+                   BackgroundColor="Transparent">
+                <Image
+                    x:Name="menu_context"      
+                    VerticalOptions="CenterAndExpand"
+                    HorizontalOptions="StartAndExpand"
+                    BackgroundColor="Transparent"
+                    Source="{local:EmbeddedImage fileName=back_arrow.png}"
+                    HeightRequest="12"
+                    Aspect="AspectFit"
+                    >
+                    <Image.Margin>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <OnPlatform.Platforms>
+                                <On Platform="iOS" Value="20, 0, 0, 0" />
+                                <On Platform="Android" Value="20, 0, 0, 0" />
+                                <On Platform="UWP" Value="20, 0, 0, 0" />
+                            </OnPlatform.Platforms>
+                        </OnPlatform>
+                    </Image.Margin>
+                </Image>
+                <utils:NeatFrame.GestureRecognizers>
+                    <TapGestureRecognizer
+                             Tapped="Backward"
+                             NumberOfTapsRequired="1" />
+                </utils:NeatFrame.GestureRecognizers>
+            </utils:NeatFrame>
+        </AbsoluteLayout>
+    </ContentPage.Content>
+</ContentPage>

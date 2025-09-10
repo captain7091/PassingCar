@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PassingCar.Views.Intitial.BootMessages"
+             xmlns:local="clr-namespace:PassingCar.Extensions"
+             xmlns:utils="clr-namespace:PassingCar.Utils"
+             xmlns:markups="clr-namespace:PassingCar;assembly=PassingCar"
+             BackgroundColor="White">
+    <ContentPage.Content>
+        <AbsoluteLayout BackgroundColor="White" x:Name="bootmessages_page">
+            <StackLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+                <Grid Margin="20,60,20,20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Text="Elige un mensaje" FontAttributes="Bold"></Label>
+                    <ScrollView Grid.Row="1" Grid.ColumnSpan="2" HeightRequest="500">
+                        <StackLayout Padding="10" x:Name="MessagesSP"/>
+                    </ScrollView>
+
+                    <Button Grid.Row="2" Grid.Column="0" Margin="5"  BackgroundColor="#FE3F40"
+                    x:Name="CancelBtn"
+                            TextColor="White"
+                        HorizontalOptions="FillAndExpand"
+                    VerticalOptions="End"
+                        CornerRadius="20"
+                        HeightRequest="40"
+                        FontAttributes="Bold"
+                        FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                        FontFamily="RejBold"
+                        CharacterSpacing="1"
+                        Text="CANCELAR"
+                        Command="{Binding CancelCommand}"></Button>
+                    <Button Grid.Row="2" Grid.Column="1" Margin="5"  BackgroundColor="#FE3F40"
+                    x:Name="SendBtn"
+                            TextColor="White"
+                        HorizontalOptions="FillAndExpand"
+                        CornerRadius="20"
+                        HeightRequest="40"
+                        FontAttributes="Bold"
+                        FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                        FontFamily="RejBold"
+                        CharacterSpacing="1"
+                        Text="ENVIAR"
+                        Command="{Binding CancelCommand}"></Button>
+                </Grid>
+            </StackLayout>
+            <Grid x:Name="grid_context" Margin="0,0,0,0" AbsoluteLayout.LayoutBounds="0,0,1,0.08" AbsoluteLayout.LayoutFlags="All" BackgroundColor="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+            </Grid>
+            <utils:NeatFrame AbsoluteLayout.LayoutBounds="0,0,0.13,0.08" AbsoluteLayout.LayoutFlags="All"
+                   Padding="0" Margin="0" CornerRadius="25"
+                   BorderColor="Transparent"
+                   BackgroundColor="Transparent">
+                <Image
+                    x:Name="menu_context"            
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                    BackgroundColor="Transparent"
+                    Source="{local:EmbeddedImage fileName=back_arrow.png}"
+                    HeightRequest="12"
+                    Aspect="AspectFit"
+                    >
+                    <Image.Margin>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <OnPlatform.Platforms>
+                                <On Platform="iOS" Value="20, 0, 0, 0" />
+                                <On Platform="Android" Value="20, 0, 0, 0" />
+                                <On Platform="UWP" Value="20, 0, 0, 0" />
+                            </OnPlatform.Platforms>
+                        </OnPlatform>
+                    </Image.Margin>
+                </Image>
+                <utils:NeatFrame.GestureRecognizers>
+                    <TapGestureRecognizer
+                             Tapped="Backward"
+                             NumberOfTapsRequired="1" />
+                </utils:NeatFrame.GestureRecognizers>
+            </utils:NeatFrame>
+            <Label
+                AbsoluteLayout.LayoutBounds="0,0,1,0.08" AbsoluteLayout.LayoutFlags="All"
+                x:Name="hello_context"
+                Text="Mensajes,"
+                BackgroundColor="Transparent"
+                VerticalOptions="CenterAndExpand"
+                HorizontalTextAlignment="Center"
+                HorizontalOptions="EndAndExpand"
+                FontSize="25"
+                TextColor="#b4b4b1"
+                FontFamily="RajBold"
+                >
+                <Label.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <OnPlatform.Platforms>
+                            <On Platform="iOS" Value="0, 0, 20, 0" />
+                            <On Platform="Android" Value="0, 40, 0, 0" />
+                            <On Platform="UWP" Value="0, 0, 40, 0" />
+                        </OnPlatform.Platforms>
+                    </OnPlatform>
+                </Label.Margin>
+            </Label>
+        </AbsoluteLayout>
+    </ContentPage.Content>
+</ContentPage>

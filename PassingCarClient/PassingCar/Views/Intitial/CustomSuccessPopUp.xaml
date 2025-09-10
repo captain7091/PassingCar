@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mopups:PopupPage
+    x:Class="PassingCar.Views.Intitial.CustomSuccessPopUp"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:local="clr-namespace:PassingCar.Extensions"
+    xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups"
+    xmlns:mopupsanim="clr-namespace:Mopups.Animations;assembly=Mopups"
+    xmlns:utils="clr-namespace:PassingCar.Utils"
+    xmlns:views="clr-namespace:PassingCar.Views"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit">
+    <utils:NeatFrame
+        Background="Transparent"
+        CornerRadius="20"
+        Padding="10"
+        x:Name="parentFrame">
+
+        <utils:NeatFrame
+            Background="White"
+            CornerRadius="20"
+            HorizontalOptions="Center"
+            Padding="10"
+            VerticalOptions="Center"
+            x:Name="childFrame">
+            <Grid Padding="10" x:Name="StackContent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Image
+                    Aspect="AspectFit"
+                    BackgroundColor="Transparent"
+                    Grid.Row="0"
+                    HeightRequest="70"
+                    HorizontalOptions="Center"
+                    Source="passingcar_default_white.png"
+                    VerticalOptions="Center"
+                    WidthRequest="70" />
+                <Label
+                    FontAttributes="Bold"
+                    FontSize="Large"
+                    Grid.Row="1"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    VerticalOptions="Center"
+                    TextColor="#4CAF50"
+                    x:Name="TitleLabel" />
+                <ScrollView
+                    Grid.Row="2"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Start">
+                    <Label HorizontalTextAlignment="Center" x:Name="Meesage" />
+                </ScrollView>
+                <Button
+                    Background="#4CAF50"
+                    CornerRadius="15"
+                    Grid.Row="3"
+                    HorizontalOptions="Center"
+                    Padding="15"
+                    TextColor="White"
+                    x:Name="CloseButton" />
+            </Grid>
+        </utils:NeatFrame>
+    </utils:NeatFrame>
+
+</mopups:PopupPage>

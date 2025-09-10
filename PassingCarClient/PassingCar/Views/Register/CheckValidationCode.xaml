@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:PassingCar.Extensions"
+             x:Class="PassingCar.Views.CheckValidationCode"
+             xmlns:markups="clr-namespace:PassingCar;assembly=PassingCar"
+             xmlns:utils="clr-namespace:PassingCar.Utils"
+             BackgroundColor="White">
+     <ContentPage.Content>
+        <AbsoluteLayout BackgroundColor="Transparent" x:Name="register_page">
+            <Grid
+                AbsoluteLayout.LayoutBounds="0,0,1,0.90" AbsoluteLayout.LayoutFlags="All"
+                VerticalOptions="Center"
+                BackgroundColor="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Label 
+                     Grid.Row="0"
+                     Margin="60,0,60,0"
+                     VerticalOptions="CenterAndExpand"
+                     HorizontalOptions="CenterAndExpand"
+                     FontFamily="RajBold"
+                     FontSize="{markups:OnScreenSize DefaultSize='16' , Small='14', Medium='14',  ExtraSmall='12'}"
+                     LineHeight="1.2"
+                     Text="Te acabamos de enviar un código de validación vía SMS, por favor introdúcelo aquí:" 
+                     BackgroundColor="Transparent">
+                </Label>
+                <StackLayout 
+                    Grid.Row="1"
+                    HorizontalOptions="CenterAndExpand">
+                    <Grid Padding="50,20,50,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <local:CustomEntry x:Name="step1"  Grid.Column="0" TextChanged="step1_TextChanged" Keyboard="Numeric" MaxLength="1" HorizontalTextAlignment="Center" BackgroundColor="#e5e5e5" TextColor="Black" FontFamily="fontbold"/>
+                        <local:CustomEntry x:Name="step2"  Grid.Column="1" TextChanged="step2_TextChanged" Keyboard="Numeric" MaxLength="1" HorizontalTextAlignment="Center" BackgroundColor="#e5e5e5" TextColor="Black" FontFamily="fontbold"/>
+                        <local:CustomEntry x:Name="step3"  Grid.Column="2" TextChanged="step3_TextChanged"  Keyboard="Numeric" MaxLength="1" HorizontalTextAlignment="Center" BackgroundColor="#e5e5e5" TextColor="Black" FontFamily="fontbold"/>
+                        <local:CustomEntry x:Name="step4"  Grid.Column="3" TextChanged="step4_TextChanged" Keyboard="Numeric" MaxLength="1" HorizontalTextAlignment="Center" BackgroundColor="#e5e5e5" TextColor="Black" FontFamily="fontbold"/>
+                        <local:CustomEntry x:Name="step5"  Grid.Column="4" TextChanged="step4_TextChanged" Keyboard="Numeric" MaxLength="1" HorizontalTextAlignment="Center" BackgroundColor="#e5e5e5" TextColor="Black" FontFamily="fontbold"/>
+                    </Grid>
+                </StackLayout>
+                <!--Text="{Binding ValidationCode}"-->
+                <Button  
+                  Grid.Row="2"
+                  Margin="0, 30, 0, 0"
+                  WidthRequest="150"
+                  Text="CONFIRMAR CÓDIGO"
+                  TextColor="White"
+                  CharacterSpacing="0"
+                  FontFamily="RajSemiBold"
+                  FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                  CornerRadius="15"
+                  VerticalOptions="CenterAndExpand"
+                  HorizontalOptions="CenterAndExpand"
+                  BackgroundColor="#FE3F40"
+                  HeightRequest="35"    
+                  Clicked="Button_Clicked"
+                />
+                <!--Command="{Binding CheckCodeCommand}"-->
+                <Label 
+                     Grid.Row="3"
+                     Margin="60,30,60,0"
+                     VerticalOptions="CenterAndExpand"
+                     HorizontalOptions="CenterAndExpand"
+                     FontFamily="RajSemiBold"
+                     FontSize="{markups:OnScreenSize DefaultSize='16' , Small='14', Medium='14',  ExtraSmall='12'}"
+                     LineHeight="1.2"
+                     Text="Didn't work? " 
+                     BackgroundColor="Transparent">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span 
+                            FontFamily="RajSemiBold"
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            Text="¿No funciona? " TextColor="#44394a"/>
+                            <Span                          
+                            FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                            FontFamily="RajSemiBold"
+                            Text="Por favor envíame otro código." TextColor="#f81a21">
+                                <Span.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding SendAgainCommand}"
+                                         NumberOfTapsRequired="1" />
+                                </Span.GestureRecognizers>
+                            </Span>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </Grid>
+            <Grid x:Name="grid_context" Margin="0,0,0,0" AbsoluteLayout.LayoutBounds="0,0,1,0.08" AbsoluteLayout.LayoutFlags="All" BackgroundColor="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+            </Grid>
+            <utils:NeatFrame AbsoluteLayout.LayoutBounds="0,0,0.13,0.08" AbsoluteLayout.LayoutFlags="All"
+                   Padding="0" Margin="0" CornerRadius="25"
+                   BorderColor="Transparent"
+                   BackgroundColor="Transparent">
+                <Image
+                x:Name="back_button"
+                AbsoluteLayout.LayoutBounds="0,0,1,0.08" AbsoluteLayout.LayoutFlags="All"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="StartAndExpand"
+                BackgroundColor="Transparent"
+                Source="back_arrow.png"
+                HeightRequest="12"
+                Aspect="AspectFit"
+                >
+                    <Image.Margin>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <OnPlatform.Platforms>
+                                <On Platform="iOS" Value="20, 0, 0, 0" />
+                                <On Platform="Android" Value="20, 0, 0, 0" />
+                                <On Platform="UWP" Value="20, 0, 0, 0" />
+                            </OnPlatform.Platforms>
+                        </OnPlatform>
+                    </Image.Margin>
+                </Image>
+                <utils:NeatFrame.GestureRecognizers>
+                    <TapGestureRecognizer
+                             Tapped="Backward"
+                             NumberOfTapsRequired="1" />
+                </utils:NeatFrame.GestureRecognizers>
+                <utils:NeatFrame.Padding>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <OnPlatform.Platforms>
+                            <On Platform="iOS" Value="0, 0, 0, 0" />
+                            <On Platform="Android" Value="0, 0, 0, 0" />
+                            <On Platform="UWP" Value="0, 0, 0, 0" />
+                        </OnPlatform.Platforms>
+                    </OnPlatform>
+                </utils:NeatFrame.Padding>
+            </utils:NeatFrame>
+            <Image
+                x:Name="register_logo"
+                AbsoluteLayout.LayoutBounds="0,0,1,0.25" AbsoluteLayout.LayoutFlags="All"
+                Margin="0, 0, 0, 0"
+                HeightRequest="110"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="CenterAndExpand"
+                BackgroundColor="Transparent"
+                Source="logo_register.png"               
+                Aspect="AspectFit"
+                >
+            </Image>
+            <Image
+                AbsoluteLayout.LayoutBounds="0,1,1,0.09" AbsoluteLayout.LayoutFlags="All"
+                Source="help_icon_border.png"
+                BackgroundColor="Transparent"
+                HeightRequest="40"
+                Margin="0,0,30,30"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="EndAndExpand"
+                >
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer
+                                 Tapped="GoHelpPage"
+                                 NumberOfTapsRequired="1" />
+                </Image.GestureRecognizers>
+            </Image>
+        </AbsoluteLayout>
+    </ContentPage.Content>
+</ContentPage>
