@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>PassingCar_Co</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PassingCar.styles.css" asp-append-version="true" />
+	<style>
+	
+	.column {
+		margin: 20px 20px 20px 20px;
+	}
+	.header {
+		background-color: #1892df;
+		text-align: center;
+		
+	}
+	.content{
+		background-color:lightgray;
+	}
+	
+	.header img {
+		max-width: 200px;
+		text-align: center;
+		margin-top: 20px;
+	}
+	
+	h2.title {
+		color: white;
+		text-align: center;
+		padding: 0px 0px 40px 0px;
+	}
+	
+	.subtitle{
+		text-align: center;
+		padding: 30px 0px;
+	}
+	
+	.column_two {
+	  flex: 50%;
+	  padding: 20px;
+	  height: 300px; /* Should be removed. Only for demonstration */
+	}
+
+	.row {
+		display: flex;
+	}
+	
+	.content * {
+		box-sizing: border-box;
+	}
+	
+	.footer{
+		text-align: center;
+		padding: 10px 0px;
+		background-color:lightgray;
+	}
+	</style>
+</head>
+<body>
+	<div class="column">
+		<div class="header">
+			<img src="~/Images/passingcar_white_logo.png" alt="PassingCar" />
+			<h2 class="title">PassingCar - Order Status/Confirm Order/Delivered/Account Created<h2>
+		</div>
+		<div class="content">
+			<h3 class="subtitle"><u>Subtitle</u></h3>
+			<div class="row">
+			  <div class="column_two" style="background-color:#aaa;">
+				<h2>Details 1</h2>
+				<p>Some text..</p>
+			  </div>
+			  <div class="column_two" style="background-color:#bbb;">
+				<h2>Details 2</h2>
+				<p>Some text..</p>
+			  </div>
+			  
+			</div>			
+		</div>	
+		<div class="footer">
+				<p>Extra Details - Uber can verify package. || © Copyright 2022 PassingCar Co</p>
+		</div>		
+	</div>
+</body>
+</html>
