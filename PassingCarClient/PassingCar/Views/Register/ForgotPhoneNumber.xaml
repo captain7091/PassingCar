@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:PassingCar.Extensions"
+             xmlns:markups="clr-namespace:PassingCar;assembly=PassingCar"
+              xmlns:utils="clr-namespace:PassingCar.Utils"
+             x:Class="PassingCar.Views.ForgotPhoneNumber"
+             BackgroundColor="White">
+    <ContentPage.Content>
+        <AbsoluteLayout BackgroundColor="Transparent" x:Name="forgot_phonecheck_page">
+            <AbsoluteLayout.Padding>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <OnPlatform.Platforms>
+                        <On Platform="iOS" Value="0, 0, 0, 0" />
+                        <On Platform="Android" Value="0, 0, 0, 0" />
+                        <On Platform="UWP" Value="0, 0, 0, 0" />
+                    </OnPlatform.Platforms>
+                </OnPlatform>
+            </AbsoluteLayout.Padding>
+            <Grid
+                AbsoluteLayout.LayoutBounds="0,0,1,0.90" AbsoluteLayout.LayoutFlags="All"
+                VerticalOptions="Center"
+                BackgroundColor="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Label 
+                     Grid.Row="0"
+                     Margin="20,40,20,10"
+                     VerticalOptions="CenterAndExpand"
+                     HorizontalOptions="CenterAndExpand"
+                     FontFamily="RajBold"
+                     FontSize="{markups:OnScreenSize DefaultSize='16' , Small='14', Medium='14',  ExtraSmall='12'}"
+                     Text="Please insert your phone number to verify:" 
+                     BackgroundColor="Transparent">
+                </Label>
+                <StackLayout 
+                    Grid.Row="1"
+                    Orientation="Vertical" Padding="20,10,20,10" Spacing="0">
+                    <utils:NeatFrame
+                    CornerRadius="10"
+                    VerticalOptions="Center"
+                    HorizontalOptions="FillAndExpand"
+                    Margin="40,0,40,0"
+                    Padding="0"
+                    BorderColor="LightGray"
+                    IsClippedToBounds="True"
+                    BackgroundColor="White">
+                        <StackLayout Orientation="Horizontal"
+                                 HorizontalOptions="FillAndExpand"
+                                 VerticalOptions="FillAndExpand">
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowPopupCommand}"/>
+                            </StackLayout.GestureRecognizers>
+                            <Image
+                            HeightRequest="26"
+                            Source="{Binding SelectedCountry.FlagUrl}"
+                            VerticalOptions="CenterAndExpand"
+                            WidthRequest="26" 
+                            Margin="20,10,0,10"/>
+                            <Label Text="{Binding SelectedCountry.CountryName}"
+                               VerticalTextAlignment="Center"
+                               HorizontalTextAlignment="Start"
+                               Margin="10,0"
+                               HorizontalOptions="Start"
+                               VerticalOptions="CenterAndExpand"/>
+                            <Label
+                               x:Name="country_code"
+                               Text="{Binding SelectedCountry.CountryCode, StringFormat='(+{0})'}"
+                               VerticalTextAlignment="Center"
+                               Margin="20,0"
+                               HorizontalTextAlignment="End"
+                               HorizontalOptions="EndAndExpand"
+                               VerticalOptions="CenterAndExpand"/>
+                        </StackLayout>
+                    </utils:NeatFrame>
+                </StackLayout>
+                <Grid 
+         Grid.Row="2"
+             WidthRequest="200"
+         HorizontalOptions="CenterAndExpand">
+                    <Entry 
+             x:Name="number"
+             WidthRequest="200"
+             HorizontalTextAlignment="Center"
+             Placeholder="xxx - xxx - xxx" 
+             HorizontalOptions="StartAndExpand"
+             Keyboard="Numeric"
+             Margin="0"
+             FontSize="{markups:OnScreenSize DefaultSize='16' , Small='14', Medium='14',  ExtraSmall='12'}"
+             />
+                    <Label
+             VerticalOptions="Center"
+             Margin="10,0,0,0"
+             HorizontalOptions="Start"
+             x:Name="countryInit"/>
+                </Grid>
+                <Button  
+                  Grid.Row="3"
+                  Margin="0, 40, 0, 0"
+                  WidthRequest="180"
+                  Text="Check number phone"
+                  TextColor="White"
+                  CharacterSpacing="0"
+                  FontFamily="RajSemiBold"
+                  FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
+                  CornerRadius="15"
+                  VerticalOptions="CenterAndExpand"
+                  HorizontalOptions="CenterAndExpand"
+                  BackgroundColor="#FE3F40"
+                  HeightRequest="35"                
+                  Clicked="Button_Clicked"
+                   >
+                    <!--Command="{Binding SendCodeCommand}"-->
+                </Button>
+            </Grid>
+            <Grid x:Name="grid_context" Margin="0,0,0,0" AbsoluteLayout.LayoutBounds="0,0,1,0.08" AbsoluteLayout.LayoutFlags="All" BackgroundColor="Transparent">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+            </Grid>
+            <utils:NeatFrame AbsoluteLayout.LayoutBounds="0,0,0.13,0.08" AbsoluteLayout.LayoutFlags="All"
+                   Padding="0" Margin="0" CornerRadius="25"
+                   BorderColor="Transparent"
+                   BackgroundColor="Transparent">
+            <Image
+                x:Name="back_button"
+                AbsoluteLayout.LayoutBounds="0,0,1,0.08" AbsoluteLayout.LayoutFlags="All"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="StartAndExpand"
+                BackgroundColor="Transparent"
+                Source="{local:EmbeddedImage fileName=back_arrow.png}"
+                HeightRequest="12"
+                Aspect="AspectFit"
+                >
+                    <Image.Margin>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <OnPlatform.Platforms>
+                                <On Platform="iOS" Value="20, 0, 0, 0" />
+                                <On Platform="Android" Value="20, 0, 0, 0" />
+                                <On Platform="UWP" Value="20, 0, 0, 0" />
+                            </OnPlatform.Platforms>
+                        </OnPlatform>
+                    </Image.Margin>
+            </Image>
+            <utils:NeatFrame.GestureRecognizers>
+                <TapGestureRecognizer
+                             Tapped="Backward"
+                             NumberOfTapsRequired="1" />
+            </utils:NeatFrame.GestureRecognizers>
+            </utils:NeatFrame>
+            <Image
+                x:Name="topbar_register_logo"
+                AbsoluteLayout.LayoutBounds="0,0,1,0.07" AbsoluteLayout.LayoutFlags="All"
+                Margin="0, 0, 0, 0"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="CenterAndExpand"
+                BackgroundColor="Transparent"
+                Source="{local:EmbeddedImage fileName=logo_forgot.png}"               
+                Aspect="AspectFit"
+                >
+            </Image>
+            <Image
+                x:Name="register_logo"
+                AbsoluteLayout.LayoutBounds="0,0,1,0.25" AbsoluteLayout.LayoutFlags="All"
+                Margin="0, 0, 0, 0"
+                HeightRequest="110"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="CenterAndExpand"
+                BackgroundColor="Transparent"
+                Source="{local:EmbeddedImage fileName=logo_forgot.png}"               
+                Aspect="AspectFit"
+                >
+            </Image>
+            <Image
+                AbsoluteLayout.LayoutBounds="0,1,1,0.09" AbsoluteLayout.LayoutFlags="All"
+                Source="{local:EmbeddedImage fileName=help_icon_border.png}"
+                BackgroundColor="Transparent"
+                HeightRequest="40"
+                Margin="0,0,30,30"
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="EndAndExpand"
+                >
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer
+                                 Tapped="GoHelpPage"
+                                 NumberOfTapsRequired="1" />
+                </Image.GestureRecognizers>
+            </Image>
+        </AbsoluteLayout>
+    </ContentPage.Content>
+</ContentPage>

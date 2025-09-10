@@ -1,0 +1,285 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    BackgroundColor="White"
+    x:Class="PassingCar.Views.SupportPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:local="clr-namespace:PassingCar.Extensions"
+    xmlns:markups="clr-namespace:PassingCar;assembly=PassingCar"
+    xmlns:utils="clr-namespace:PassingCar.Utils"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    <ContentPage.Content>
+        <AbsoluteLayout BackgroundColor="Transparent" x:Name="support_page">
+            <Grid
+                AbsoluteLayout.LayoutBounds="0,0,1,1"
+                AbsoluteLayout.LayoutFlags="All"
+                BackgroundColor="Transparent"
+                Margin="0,70,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Image
+                    Aspect="AspectFit"
+                    BackgroundColor="Transparent"
+                    Grid.Row="0"
+                    HeightRequest="70"
+                    HorizontalOptions="CenterAndExpand"
+                    Margin="0,60,0,60"
+                    Source="help_menu.png"
+                    VerticalOptions="CenterAndExpand" />
+                <StackLayout
+                    Grid.Row="1"
+                    Orientation="Vertical"
+                    Padding="0,20,0,10"
+                    Spacing="0">
+                    <utils:NeatFrame
+                        BackgroundColor="#d2eaff"
+                        BorderColor="Transparent"
+                        CornerRadius="10"
+                        HorizontalOptions="FillAndExpand"
+                        IsClippedToBounds="True"
+                        Margin="40,0,40,0"
+                        Padding="30,20,30,20"
+                        VerticalOptions="Center">
+                        <StackLayout
+                            HorizontalOptions="FillAndExpand"
+                            Orientation="Horizontal"
+                            VerticalOptions="FillAndExpand">
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowPopupCommand}" />
+                            </StackLayout.GestureRecognizers>
+                            <Image
+                                Aspect="AspectFit"
+                                BackgroundColor="Transparent"
+                                HeightRequest="25"
+                                HorizontalOptions="Center"
+                                Margin="0,0,10,0"
+                                Source="info_app.png"
+                                VerticalOptions="CenterAndExpand" />
+                            <Label
+                                FontFamily="RajBold"
+                                FontSize="{markups:OnScreenSize DefaultSize='18',
+                                                                Small='16',
+                                                                Medium='16',
+                                                                ExtraSmall='14'}"
+                                HorizontalOptions="Center"
+                                HorizontalTextAlignment="Start"
+                                Margin="0,0"
+                                Text="Info App"
+                                VerticalOptions="CenterAndExpand"
+                                VerticalTextAlignment="Center" />
+
+                        </StackLayout>
+                    </utils:NeatFrame>
+                </StackLayout>
+                <StackLayout
+                    Grid.Row="2"
+                    Orientation="Vertical"
+                    Padding="0,0,0,10"
+                    Spacing="0">
+                    <utils:NeatFrame
+                        BackgroundColor="#d2eaff"
+                        BorderColor="Transparent"
+                        CornerRadius="10"
+                        HorizontalOptions="FillAndExpand"
+                        IsClippedToBounds="True"
+                        Margin="40,0,40,0"
+                        Padding="30,20,30,20"
+                        VerticalOptions="Center">
+                        <StackLayout
+                            HorizontalOptions="FillAndExpand"
+                            Orientation="Horizontal"
+                            VerticalOptions="FillAndExpand">
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowPopupCommand}" />
+                            </StackLayout.GestureRecognizers>
+                            <Image
+                                Aspect="AspectFit"
+                                BackgroundColor="Transparent"
+                                HeightRequest="25"
+                                HorizontalOptions="Start"
+                                IsVisible="True"
+                                Margin="0,0,10,0"
+                                Source="contact_chat.png"
+                                VerticalOptions="CenterAndExpand" />
+                            <Label
+                                FontFamily="RajBold"
+                                FontSize="{markups:OnScreenSize DefaultSize='18',
+                                                                Small='16',
+                                                                Medium='16',
+                                                                ExtraSmall='14'}"
+                                HorizontalOptions="Start"
+                                HorizontalTextAlignment="Start"
+                                Margin="0,0"
+                                Text="www.passingcar.com"
+                                VerticalOptions="CenterAndExpand"
+                                VerticalTextAlignment="Center" />
+                        </StackLayout>
+                    </utils:NeatFrame>
+                </StackLayout>
+                <StackLayout
+                    Grid.Row="3"
+                    Orientation="Vertical"
+                    Padding="0,70,0,0"
+                    Spacing="0">
+
+                    <StackLayout
+                        HorizontalOptions="CenterAndExpand"
+                        Orientation="Vertical"
+                        VerticalOptions="FillAndExpand">
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer />
+                        </StackLayout.GestureRecognizers>
+                        <utils:NeatFrame
+                            BackgroundColor="#d2eaff"
+                            BorderColor="Transparent"
+                            CornerRadius="20"
+                            HorizontalOptions="CenterAndExpand"
+                            IsClippedToBounds="True"
+                            Margin="0,0,0,0"
+                            Padding="15,15,15,15"
+                            VerticalOptions="CenterAndExpand">
+                            <Image
+                                Aspect="AspectFit"
+                                BackgroundColor="Transparent"
+                                HeightRequest="15"
+                                HorizontalOptions="CenterAndExpand"
+                                Margin="0,0,0,0"
+                                Source="inbox_menu.png"
+                                VerticalOptions="CenterAndExpand" />
+                        </utils:NeatFrame>
+                        <Label
+                            FontFamily="RajSemiBold"
+                            FontSize="{markups:OnScreenSize DefaultSize='14',
+                                                            Small='12',
+                                                            Medium='12',
+                                                            ExtraSmall='10'}"
+                            HorizontalOptions="CenterAndExpand"
+                            HorizontalTextAlignment="Start"
+                            Margin="0,0,0,0"
+                            Text="Envíanos un email:"
+                            VerticalOptions="CenterAndExpand"
+                            VerticalTextAlignment="Center" />
+                        <Label
+                            FontFamily="RajBold"
+                            FontSize="{markups:OnScreenSize DefaultSize='16',
+                                                            Small='14',
+                                                            Medium='14',
+                                                            ExtraSmall='12'}"
+                            HorizontalOptions="CenterAndExpand"
+                            HorizontalTextAlignment="Start"
+                            Margin="0,0,0,0"
+                            Text="info@passingcar.com"
+                            VerticalOptions="CenterAndExpand"
+                            VerticalTextAlignment="Center" />
+                    </StackLayout>
+                </StackLayout>
+            </Grid>
+            <Grid
+                AbsoluteLayout.LayoutBounds="0,0,1,0.08"
+                AbsoluteLayout.LayoutFlags="All"
+                BackgroundColor="Transparent"
+                Margin="0,0,0,0"
+                x:Name="grid_context">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+            </Grid>
+            <utils:NeatFrame
+                AbsoluteLayout.LayoutBounds="0,0,0.13,0.08"
+                AbsoluteLayout.LayoutFlags="All"
+                BackgroundColor="Transparent"
+                BorderColor="Transparent"
+                CornerRadius="25"
+                Margin="0"
+                Padding="0">
+                <Image
+                    AbsoluteLayout.LayoutBounds="0,0,1,0.09"
+                    AbsoluteLayout.LayoutFlags="All"
+                    Aspect="AspectFit"
+                    BackgroundColor="Transparent"
+                    HeightRequest="12"
+                    HorizontalOptions="StartAndExpand"
+                    Margin="20,0,0,0"
+                    Source="back_arrow.png"
+                    VerticalOptions="CenterAndExpand"
+                    x:Name="menu_context" />
+                <utils:NeatFrame.GestureRecognizers>
+                    <TapGestureRecognizer NumberOfTapsRequired="1" Tapped="BackButton" />
+                </utils:NeatFrame.GestureRecognizers>
+            </utils:NeatFrame>
+            <Label
+                AbsoluteLayout.LayoutBounds="0,0,1,0.09"
+                AbsoluteLayout.LayoutFlags="All"
+                BackgroundColor="Transparent"
+                FontFamily="RajBold"
+                FontSize="{markups:OnScreenSize DefaultSize='20',
+                                                Small='16',
+                                                Medium='16',
+                                                ExtraSmall='14'}"
+                HorizontalOptions="EndAndExpand"
+                HorizontalTextAlignment="Center"
+                Margin="0,0,40,0"
+                Text="Como podemos ayudarte?"
+                TextColor="#b4b4b1"
+                VerticalOptions="CenterAndExpand"
+                x:Name="hello_context" />
+            <Frame
+                AbsoluteLayout.LayoutBounds="0, 1, 1, AutoSize"
+                AbsoluteLayout.LayoutFlags="YProportional,WidthProportional"
+                BackgroundColor="#4fa5f0"
+                CornerRadius="{OnPlatform Android=5,
+                                          iOS=30}"
+                HeightRequest="60"
+                HorizontalOptions="CenterAndExpand"
+                IsClippedToBounds="True"
+                Margin="0,0,0,25"
+                Padding="30,15,30,15"
+                VerticalOptions="FillAndExpand"
+                WidthRequest="60"
+                x:Name="add_image">
+                <StackLayout Orientation="Horizontal">
+                    <Label
+                        BackgroundColor="Transparent"
+                        FontFamily="RajBold"
+                        FontSize="{markups:OnScreenSize DefaultSize='18',
+                                                        Small='12',
+                                                        Medium='14',
+                                                        ExtraSmall='10'}"
+                        HorizontalOptions="StartAndExpand"
+                        Margin="0,0,5,0"
+                        Text="Déjanos un comentario"
+                        TextColor="White"
+                        VerticalOptions="CenterAndExpand"
+                        x:Name="up_context">
+                        <Label.Padding>
+                            <OnPlatform x:TypeArguments="Thickness">
+                                <OnPlatform.Platforms>
+                                    <On Platform="iOS" Value="0, 0, 0, 0" />
+                                    <On Platform="Android" Value="0, 0, 0, 0" />
+                                    <On Platform="UWP" Value="0, 0, 0, 0" />
+                                </OnPlatform.Platforms>
+                            </OnPlatform>
+                        </Label.Padding>
+                    </Label>
+                    <Image
+                        Aspect="AspectFit"
+                        BackgroundColor="Transparent"
+                        HeightRequest="18"
+                        HorizontalOptions="EndAndExpand"
+                        Source="heart.png"
+                        VerticalOptions="CenterAndExpand" />
+                </StackLayout>
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer NumberOfTapsRequired="1" />
+                </Frame.GestureRecognizers>
+            </Frame>
+        </AbsoluteLayout>
+    </ContentPage.Content>
+</ContentPage>
