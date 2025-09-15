@@ -368,29 +368,6 @@ namespace PassingCar.Views
             }
         }
 
-        // OFERTAS CONDUCTORES BUTTON CLICK HANDLER - ADDED FROM OLD VERSION
-        private async void OfertasConductoresBtn_Clicked(object sender, EventArgs e)
-        {
-            try
-            {
-                // Navigate to Offers page
-                await Shell.Current.GoToAsync("OffersPage");
-            }
-            catch (Exception ex)
-            {
-                try
-                {
-                    // Alternative: Direct navigation
-                    await Navigation.PushAsync(new OffersPage());
-                }
-                catch (Exception ex2)
-                {
-                    // Handle navigation errors
-                    System.Diagnostics.Debug.WriteLine($"Navigation error: {ex2.Message}");
-                    _ = ex2.Handle();
-                }
-            }
-        }
 
         private void TapGestureRecognizer_Tapped(object sender, TappedEventArgs e)
         {

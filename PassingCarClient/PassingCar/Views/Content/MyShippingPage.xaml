@@ -11,21 +11,6 @@
     <ContentPage.Content>
         <AbsoluteLayout BackgroundColor="Transparent" x:Name="myshipping_page">
 
-            <!-- OFERTAS CONDUCTORES BUTTON - ADDED FROM OLD VERSION -->
-            <Button 
-                x:Name="OfertasConductoresBtn"
-                Text="*** OFERTAS CONDUCTORES - TE LO LLEVO! ***"
-                BackgroundColor="#FF0000"
-                TextColor="#FFFFFF"
-                FontAttributes="Bold"
-                FontSize="18"
-                HeightRequest="60"
-                Margin="0,0,0,0"
-                HorizontalOptions="FillAndExpand"
-                VerticalOptions="Start"
-                AbsoluteLayout.LayoutBounds="0,0,1,0.08"
-                AbsoluteLayout.LayoutFlags="All"
-                Clicked="OfertasConductoresBtn_Clicked" />
 
             <ContentView x:Name="Entregados" IsVisible="False" Margin="0,155,0,0" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
                 <CollectionView

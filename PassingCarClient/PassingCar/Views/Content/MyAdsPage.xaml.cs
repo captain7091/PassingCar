@@ -840,6 +840,32 @@ namespace PassingCar.Views
             }
         }
 
+        // OFERTAS CONDUCTORES BUTTON CLICK HANDLER - MOVED FROM MIS REPARTOS
+        private async void OfertasConductoresBtn_Clicked(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("[MyAdsPage] Ofertas Conductores button clicked");
+                // Navigate to Offers page
+                await Shell.Current.GoToAsync("OffersPage");
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Shell navigation failed, trying direct navigation: {ex.Message}");
+                    // Alternative: Direct navigation
+                    await Navigation.PushAsync(new OffersPage());
+                }
+                catch (Exception ex2)
+                {
+                    // Handle navigation errors
+                    System.Diagnostics.Debug.WriteLine($"Navigation error: {ex2.Message}");
+                    _ = ex2.Handle();
+                }
+            }
+        }
+
 
 
         /// <summary>

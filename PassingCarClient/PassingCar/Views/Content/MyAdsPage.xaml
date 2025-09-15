@@ -14,12 +14,43 @@
     <ContentPage.Content>
         <AbsoluteLayout BackgroundColor="Transparent" x:Name="myadspage">
 
+            <!-- OFERTAS CONDUCTORES BUTTON - MOVED FROM MIS REPARTOS -->
+            <Frame 
+                x:Name="OfertasConductoresBtn"
+                BackgroundColor="#FF4444"
+                BorderColor="#CCCCCC"
+                CornerRadius="8"
+                Padding="10,8"
+                Margin="60,5,15,5"
+                HasShadow="True"
+                AbsoluteLayout.LayoutBounds="0,0.02,1,0.08"
+                AbsoluteLayout.LayoutFlags="All">
+                <Frame.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OfertasConductoresBtn_Clicked" />
+                </Frame.GestureRecognizers>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label 
+                        Grid.Column="0"
+                        Text="🚛"
+                        FontSize="18"
+                        VerticalOptions="Center"
+                        Margin="0,0,8,0" />
+                    <Label 
+                        Grid.Column="1"
+                        Text="Ofertas Conductores - Te lo Llevo!"
+                        TextColor="#FFFFFF"
+                        FontAttributes="Bold"
+                        FontSize="12"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start" />
+                </Grid>
+            </Frame>
 
-
-
-
-
-            <ContentView ZIndex="5" Loaded="offerList_Loaded" IsVisible="False"  Margin="0,155,0,0" AbsoluteLayout.LayoutBounds="0,0,1,1"
+            <ContentView ZIndex="5" Loaded="offerList_Loaded" IsVisible="False"  Margin="0,200,0,0" AbsoluteLayout.LayoutBounds="0,0,1,1"
  AbsoluteLayout.LayoutFlags="All" x:Name="offerList" >
 
 
@@ -319,7 +350,7 @@
 
         <CollectionView
     x:Name="collectionview_ads"
-    Margin="0,155,0,0"
+    Margin="0,200,0,0"
              
                
     AbsoluteLayout.LayoutBounds="0,0,1,1"
@@ -526,7 +557,7 @@
             </utils:NeatFrame.GestureRecognizers>
         </utils:NeatFrame>
         <Label
-                AbsoluteLayout.LayoutBounds="0,0,1,0.09" AbsoluteLayout.LayoutFlags="All"
+                AbsoluteLayout.LayoutBounds="0,0.12,1,0.08" AbsoluteLayout.LayoutFlags="All"
                 x:Name="hello_context"
                 Text="Mis Envíos,"
                 BackgroundColor="Transparent"
@@ -541,7 +572,7 @@
                 <OnPlatform x:TypeArguments="Thickness">
                     <OnPlatform.Platforms>
                         <On Platform="iOS" Value="0, 0, 20, 0" />
-                        <On Platform="Android" Value="0, 40, 0, 0" />
+                        <On Platform="Android" Value="0, 0, 0, 0" />
                         <On Platform="UWP" Value="0, 0, 40, 0" />
                     </OnPlatform.Platforms>
                 </OnPlatform>
