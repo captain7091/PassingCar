@@ -30,8 +30,8 @@ namespace PassingCar.IntegrationsWithApi
     {
 
         //public static readonly string ApiBaseUrl = "https://polecat-unified-wrongly.ngrok-free.app/";
-        public static readonly string ApiBaseUrl = "https://passingcar.discountlagbe.com/";
-        //public static readonly string ApiBaseUrl = "https://n4h3nzns-7160.inc1.devtunnels.ms/";
+        //public static readonly string ApiBaseUrl = "https://passingcar.discountlagbe.com/";
+        public static readonly string ApiBaseUrl = "https://n4h3nzns-7160.inc1.devtunnels.ms/";
         private static readonly ViewModels.ICustomNotification notification;
         public static bool HasMorePofiles = false;
 
@@ -1065,8 +1065,7 @@ namespace PassingCar.IntegrationsWithApi
         }
         public static async Task<InsertResponse> AddAds(AddAdsModel ads)
         {
-            System.Diagnostics.Debug.WriteLine("[API] AddAds called");
-            System.Diagnostics.Debug.WriteLine($"[API] Ad Title: '{ads?.Title}', Price: {ads?.Price}");
+            
 
             // Validate input
             if (ads == null)
@@ -1086,14 +1085,22 @@ namespace PassingCar.IntegrationsWithApi
             {
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine($"[API] AddAds attempt {attempt}/{maxRetries}");
+                    //System.Diagnostics.Debug.WriteLine($"[API] AddAds attempt {attempt}/{maxRetries}");
                     
                     AuthorizeClientForWS client = await CreateAuthorizedClientForWS();
+                    /*System.Diagnostics.Debug.WriteLine($"[API] ===== CLIENT AUTHORIZATION DEBUG =====");
                     System.Diagnostics.Debug.WriteLine($"[API] Client authorization: Success={client.Success}, ErrorMessage='{client.ErrorMessage}'");
+                    System.Diagnostics.Debug.WriteLine($"[API] Client is null: {client.Client == null}");*/
+                    /*if (client.Client != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[API] Client Base URL: {client.Client.Options?.BaseUrl}");
+                        System.Diagnostics.Debug.WriteLine($"[API] Client Default Headers: {string.Join(", ", client.Client.DefaultParameters?.Where(p => p.Type == ParameterType.HttpHeader)?.Select(p => $"{p.Name}={p.Value}") ?? new string[0])}");
+                    }
+                    System.Diagnostics.Debug.WriteLine($"[API] ===== CLIENT AUTHORIZATION DEBUG END =====");*/
 
                     if (client.Success && client.Client != null)
                     {
-                        System.Diagnostics.Debug.WriteLine("[API] Creating API request to /Ads/Add");
+                        //System.Diagnostics.Debug.WriteLine("[API] Creating API request to /Ads/Add");
                         RestRequest apiRquest = new RestRequest("/Ads/Add", Method.Post);
                         
                         // Add timeout to prevent hanging
@@ -1101,19 +1108,13 @@ namespace PassingCar.IntegrationsWithApi
                         
                         _ = apiRquest.AddJsonBody(ads);
 
-                        System.Diagnostics.Debug.WriteLine($"[API] Executing API request with {timeoutSeconds}s timeout...");
-                        System.Diagnostics.Debug.WriteLine($"[API] Request payload size: {System.Text.Json.JsonSerializer.Serialize(ads).Length} characters");
+                       // System.Diagnostics.Debug.WriteLine($"[API] Executing API request with {timeoutSeconds}s timeout...");
+                        //System.Diagnostics.Debug.WriteLine($"[API] Request payload size: {System.Text.Json.JsonSerializer.Serialize(ads).Length} characters");
                         
                         // Use cancellation token for additional timeout control
                         using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds + 5)))
                         {
-                            RestResponse apiResponse = await client.Client.ExecuteAsync(apiRquest, cts.Token);
-
-                            System.Diagnostics.Debug.WriteLine($"[API] Response received:");
-                            System.Diagnostics.Debug.WriteLine($"[API] - StatusCode: {apiResponse?.StatusCode}");
-                            System.Diagnostics.Debug.WriteLine($"[API] - ResponseStatus: {apiResponse?.ResponseStatus}");
-                            System.Diagnostics.Debug.WriteLine($"[API] - Content: {apiResponse?.Content}");
-                            System.Diagnostics.Debug.WriteLine($"[API] - ErrorMessage: {apiResponse?.ErrorMessage}");
+                            RestResponse apiResponse = await client.Client.ExecuteAsync(apiRquest, cts.Token);               
 
                             if (apiResponse != null)
                             {
@@ -1328,6 +1329,157 @@ namespace PassingCar.IntegrationsWithApi
             }
             return response;
         }
+
+        public static async Task<GetNextAdsResponse> GetMyAds()
+        {
+
+            GetNextAdsResponse response;
+            AuthorizeClientForWS client = await CreateAuthorizedClientForWS();
+
+            System.Diagnostics.Debug.WriteLine($"[API] GetMyAds authorization: Success={client.Success}, ErrorMessage='{client.ErrorMessage}'");
+
+            if (client.Success && client.Client != null)
+            {
+                System.Diagnostics.Debug.WriteLine("[API] Creating GetMyAds request to /Ads/GetMyAds");
+                RestRequest apiRequest = new RestRequest("/Ads/GetMyAds", Method.Get);
+
+                // 15s timeout for consistency
+                apiRequest.Timeout = TimeSpan.FromSeconds(30);
+
+                System.Diagnostics.Debug.WriteLine("[API] Executing GetMyAds request with 15s timeout...");
+                RestResponse apiResponse = await client.Client.ExecuteAsync(apiRequest);
+
+                response = apiResponse != null
+                    ? apiResponse.StatusCode != HttpStatusCode.OK || apiResponse.ResponseStatus != ResponseStatus.Completed
+                        ? new GetNextAdsResponse()
+                        {
+                            Success = false,
+                            ErrorMessage = apiResponse.ResponseStatus == ResponseStatus.TimedOut
+                                ? "Network timeout - please check your internet connection and try again"
+                                : $"API Error: StatusCode {apiResponse.StatusCode}, Status {apiResponse.ResponseStatus}. Content: {apiResponse.Content}"
+                        }
+                        : JsonConvert.DeserializeObject<GetNextAdsResponse>(apiResponse.Content)
+                    : new GetNextAdsResponse()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Network error - no response received from server"
+                    };
+
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyAds final response: Success={response?.Success}, AdsCount={response?.AdsItem?.Count() ?? 0}, Error='{response?.ErrorMessage}'");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyAds authorization failed: {client.ErrorMessage}");
+                response = new GetNextAdsResponse()
+                {
+                    Success = false,
+                    ErrorMessage = client.ErrorMessage
+                };
+            }
+            return response;
+        }
+
+        public static async Task<GetNextAdsResponse> GetMyOffersAds()
+        {
+            GetNextAdsResponse response;
+            AuthorizeClientForWS client = await CreateAuthorizedClientForWS();
+
+            System.Diagnostics.Debug.WriteLine($"[API] GetMyOffersAds authorization: Success={client.Success}, ErrorMessage='{client.ErrorMessage}'");
+
+            if (client.Success && client.Client != null)
+            {
+                System.Diagnostics.Debug.WriteLine("[API] Creating GetMyOffersAds request to /Ads/GetMyOffersAds");
+                RestRequest apiRequest = new RestRequest("/Ads/GetMyOffersAds", Method.Get);
+
+                apiRequest.Timeout = TimeSpan.FromSeconds(30);
+
+                System.Diagnostics.Debug.WriteLine("[API] Executing GetMyOffersAds request...");
+                 RestResponse apiResponse = await client.Client.ExecuteAsync(apiRequest);
+
+                response = apiResponse != null
+                    ? apiResponse.StatusCode != HttpStatusCode.OK || apiResponse.ResponseStatus != ResponseStatus.Completed
+                        ? new GetNextAdsResponse()
+                        {
+                            Success = false,
+                            ErrorMessage = apiResponse.ResponseStatus == ResponseStatus.TimedOut
+                                ? "Network timeout - please check your internet connection and try again"
+                                : $"API Error: StatusCode {apiResponse.StatusCode}, Status {apiResponse.ResponseStatus}. Content: {apiResponse.Content}"
+                        }
+                        : JsonConvert.DeserializeObject<GetNextAdsResponse>(apiResponse.Content)
+                    : new GetNextAdsResponse()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Network error - no response received from server"
+                    };
+
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyOffersAds final response: Success={response?.Success}, AdsCount={response?.AdsItem?.Count() ?? 0}, Error='{response?.ErrorMessage}'");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyOffersAds authorization failed: {client.ErrorMessage}");
+                response = new GetNextAdsResponse()
+                {
+                    Success = false,
+                    ErrorMessage = client.ErrorMessage
+                };
+            }
+            return response;
+        }
+
+        public static async Task<GetNextAdsResponse> GetAllUsersAds()
+        {
+
+            GetNextAdsResponse response;
+            AuthorizeClientForWS client = await CreateAuthorizedClientForWS();
+
+
+            if (client.Success && client.Client != null)
+            {
+                RestRequest apiRequest = new RestRequest("/Ads/GetAllUsersAds", Method.Get);
+
+                RestResponse apiResponse = await client.Client.ExecuteAsync(apiRequest);
+
+            
+
+                if (apiResponse != null && apiResponse.StatusCode == HttpStatusCode.OK )
+                {
+                    try
+                    {
+                        response = JsonConvert.DeserializeObject<GetNextAdsResponse>(apiResponse.Content);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[API] GetAllUsersAds JSON deserialization error: {ex.Message}");
+                        response = new GetNextAdsResponse()
+                        {
+                            Success = false,
+                            ErrorMessage = $"JSON parsing error: {ex.Message}"
+                        };
+                    }
+                }
+                else
+                {
+                    response = new GetNextAdsResponse()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Network error - no response received from server"
+                    };
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[API] GetAllUsersAds final response: Success={response?.Success}, AdsCount={response?.AdsItem?.Count() ?? 0}, Error='{response?.ErrorMessage}'");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[API] GetAllUsersAds authorization failed: {client.ErrorMessage}");
+                response = new GetNextAdsResponse()
+                {
+                    Success = false,
+                    ErrorMessage = client.ErrorMessage
+                };
+            }
+            return response;
+        }
+
         public static async Task<GetNextAdsResponse> CheckAdsUpdates(List<LocalAd> localAdsToUpdate)
         {
             CheckAdsUpdatesInput input = new CheckAdsUpdatesInput() { AdsFromLocal = new List<AdsUpdateDetails>() };
@@ -2273,10 +2425,27 @@ namespace PassingCar.IntegrationsWithApi
                     {
                         DateTime loggedTime = JsonConvert.DeserializeObject<DateTime>(await SecureStorage.GetAsync("LoggedTime"));
                         string token = JsonConvert.DeserializeObject<string>(await SecureStorage.GetAsync("Token"));
+                        
+                        // DEBUG: Token analysis
+                        System.Diagnostics.Debug.WriteLine($"[API] ===== TOKEN DEBUG START =====");
+                        System.Diagnostics.Debug.WriteLine($"[API] Token: {token}");
+                        System.Diagnostics.Debug.WriteLine($"[API] Token Length: {token?.Length}");
+                        System.Diagnostics.Debug.WriteLine($"[API] Token IsNull: {token == null}");
+                        System.Diagnostics.Debug.WriteLine($"[API] Token IsEmpty: {string.IsNullOrEmpty(token)}");
+                        System.Diagnostics.Debug.WriteLine($"[API] LoggedTime: {loggedTime}");
+                        System.Diagnostics.Debug.WriteLine($"[API] Current Time: {DateTime.Now}");
+                        System.Diagnostics.Debug.WriteLine($"[API] Time Difference: {DateTime.Now - loggedTime}");
+                        System.Diagnostics.Debug.WriteLine($"[API] Is Within 11 Hours: {DateTime.Now - loggedTime <= TimeSpan.FromHours(11)}");
+                        System.Diagnostics.Debug.WriteLine($"[API] ===== TOKEN DEBUG END =====");
+                        
                         if (loggedTime != null && !string.IsNullOrEmpty(token) && (DateTime.Now - loggedTime <= TimeSpan.FromHours(11)))
                         {
                             RestClient client = CreateClientForWS();
                             _ = client.AddDefaultHeader("Authorization", $"Bearer {token}");
+                            
+                            // DEBUG: Verify header was added
+                            System.Diagnostics.Debug.WriteLine($"[API] Authorization header added: Bearer {token?.Substring(0, Math.Min(20, token?.Length ?? 0))}...");
+                            
                             return new AuthorizeClientForWS()
                             {
                                 Success = true,
@@ -2284,6 +2453,10 @@ namespace PassingCar.IntegrationsWithApi
                                 Client = client,
                                 Token = token
                             };
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[API] Token validation failed - will try to refresh token");
                         }
                     }
                     catch (Exception)

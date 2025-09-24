@@ -113,12 +113,25 @@ namespace PassingCar.ViewModels
                                 GroupOffersDetailsExtended offerex = new GroupOffersDetailsExtended(offer, UpdateSentOffers);
                                 offerex.UserProfilePhoto = await offerex.UserId.GetUserPhoto();
                                 adsDet.OffersGroupEx.Add(offerex);
+                                
+                                // Ensure offers are visible by default
+                                if (offerex.GroupOffers != null && offerex.GroupOffers.Count > 0)
+                                {
+                                    // Force refresh of visibility properties
+                                    foreach (var offerDetail in offerex.GroupOffers)
+                                    {
+                                        offerDetail.OnPropertyChanged(nameof(offerDetail.AcceptRejectCancelBtnVisibility));
+                                    }
+                                }
                             }
                             if (Ads is null)
                             {
                                 Ads = new ObservableCollection<AdsParentExtended>();
                             }
                             Ads.Add(adsDet);
+                            
+                            // Ensure offers are visible by default
+                            adsDet.EnsureOffersVisible();
                         }
 
                         if (item.SentOffers != null && item.SentOffers.Count > 0)

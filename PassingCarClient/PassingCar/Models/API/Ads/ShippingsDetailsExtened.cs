@@ -302,11 +302,11 @@ namespace PassingCar.Models.API.Ads
         {
             try
             {
-              //  await this.GoToAds(AdsId);
+                await this.GoToAds(AdsId);
             }
             catch (Exception ex)
             {
-             //   this.OpeErrorPopUp("Failed to redirect to ads", ex.Message, "Ok");
+                this.OpeErrorPopUp("Failed to redirect to ads", ex.Message, "Ok");
             }
         }
         private async void Cancel()

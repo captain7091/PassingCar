@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using PassingCarApis.Configuration;
 
 namespace PassingCarApis.SQL
 {
@@ -16,7 +17,7 @@ namespace PassingCarApis.SQL
                         CREATE DATABASE PassingCar;";
                 if (query != "")
                 {
-                    using SqlConnection conn = new SqlConnection("Server=DESKTOP-CEAQLHA;Initial Catalog=PassingCar;Integrated Security=True;MultipleActiveResultSets=True;TrustServerCertificate=True;Connection Timeout=30;");
+                    using SqlConnection conn = new SqlConnection(AppConfiguration.MyConnectionString);
                     using SqlCommand command = new SqlCommand(query, conn);
                     try
                     {

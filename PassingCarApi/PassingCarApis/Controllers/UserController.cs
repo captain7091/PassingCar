@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using PassingCarApis.Configuration;
 using PassingCarApis.Extensions;
-using PassingCarApis.JWT;
+using PassingCarApis.Utils;
 using PassingCarApis.Models;
 using PassingCarApis.Models.API;
 using PassingCarApis.Models.API.User;
@@ -27,9 +27,11 @@ namespace PassingCarApis.Controllers
     public class UserController : PassingCarBaseController
     {
         private readonly IConfiguration _configuration;
-        public UserController(IConfiguration configuration, INotificationService notificationService, IHubService hubService, ILoginService loginService) : base(notificationService, hubService, loginService)
+        private readonly AuthService _authService;
+        public UserController(IConfiguration configuration, INotificationService notificationService, IHubService hubService, ILoginService loginService, AuthService authService) : base(notificationService, hubService, loginService)
         {
             _configuration = configuration;
+            _authService = authService;
         }
         [HttpPost(Name = "Register")]
         public async Task<InsertResponse> Register(User user)
@@ -261,31 +263,13 @@ namespace PassingCarApis.Controllers
                                         types.Add(ProfileType.Juridica);
                                     if (types.Any() && types.Count == 1)
                                         profile = types.FirstOrDefault();
-                                    Jwt jwt = _configuration.GetSection("Jwt").Get<Jwt>();
-                                    Claim[] claims = new[]
-                                    {
-                                        new Claim(JwtRegisteredClaimNames.Sub, jwt.Subject ?? ""),
-                                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                                        new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
-                                        new Claim($"Id", user.Id.ToString()),
-                                        new Claim($"Email", user.Email?.ToString() ?? ""),
-                                        new Claim($"Password", request.Password?.ToString() ?? ""),
-                                        new Claim($"Profile", request.Profile.HasValue ? request.Profile.Value.ToString(): profile.ToString()),
-                                           };
-                                    SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(jwt.Key ?? ""));
-                                    SigningCredentials singIn = new(key, SecurityAlgorithms.HmacSha256);
-                                    JwtSecurityToken token = new(
-                                        jwt.Issuer,
-                                        jwt.Audience,
-                                        claims,
-                                        expires: DateTime.Now.AddHours(12),
-                                        signingCredentials: singIn);
+                                    string token = _authService.GenerateJwtToken(user, profile);
                                     response = new LoginResponse()
                                     {
                                         Success = true,
                                         ErrorMessage = string.Empty,
                                         UserData = request.OnlyToken ? null : user,
-                                        Token = new JwtSecurityTokenHandler().WriteToken(token),
+                                        Token = token,
                                     };
                                 }
                                 else

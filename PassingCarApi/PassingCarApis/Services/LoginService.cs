@@ -10,6 +10,13 @@ namespace PassingCarApis.Services
 {
     public class LoginService : ILoginService
     {
+        private readonly AuthService _authService;
+
+        public LoginService(AuthService authService)
+        {
+            _authService = authService;
+        }
+
         public async Task<BaseUserDetails> GetUserDetails(int userId)
         {
             BaseUserDetails response = new();
@@ -42,40 +49,7 @@ namespace PassingCarApis.Services
 
         public UserIdAndProfile GetUserProfileFromToken(string jwtToken)
         {
-            try
-            {
-                int userId = 0;
-                ProfileType profile = ProfileType.Fisica;
-                JwtSecurityToken jwtTokenDetails = new JwtSecurityTokenHandler().ReadJwtToken(jwtToken);
-                IEnumerable<Claim> claimsWithIdVal = jwtTokenDetails.Claims.Where(c => c.Type == "Id");
-                IEnumerable<Claim> claimsWithProfileVal = jwtTokenDetails.Claims.Where(c => c.Type == "Profile");
-                if (claimsWithIdVal != null && claimsWithIdVal.Count() > 0)
-                {
-                    Claim userClaim = claimsWithIdVal.FirstOrDefault()!;
-                    if (userClaim != null)
-                    {
-                        _ = int.TryParse(userClaim.Value, out userId);
-                    }
-                }
-                if (claimsWithProfileVal != null && claimsWithProfileVal.Count() > 0)
-                {
-                    Claim userClaim = claimsWithProfileVal.FirstOrDefault()!;
-                    if (userClaim != null)
-                    {
-                        _ = Enum.TryParse(userClaim.Value, out profile);
-                    }
-                }
-                return new()
-                {
-                    Id = userId,
-                    Profile = profile,
-                };
-            }
-            catch (Exception ex)
-            {
-                ex.CatchIt();
-                return new();
-            }
+            return _authService.GetUserProfileFromToken(jwtToken);
         }
     }
 }

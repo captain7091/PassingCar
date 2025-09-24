@@ -16,15 +16,12 @@ using PassingCarApis.Models.API.Payment;
 using PassingCarApis.Models.API.User;
 using PassingCarApis.Services;
 using Stripe;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Twilio.Http;
 using Review = PassingCarApis.Models.Review;
 
 namespace PassingCarApis.Controllers
 {
-    // [Authorize] // TEMPORARILY DISABLED FOR TESTING
-    [Route("[controller]/[action]")]
+  [Authorize(AuthenticationSchemes = "Bearer")] 
+  [Route("[controller]/[action]")]
     [ApiController]
     public class AdsController : PassingCarBaseController
     {
@@ -81,6 +78,7 @@ namespace PassingCarApis.Controllers
             }
             return true;
         }
+    
         [HttpPost(Name = "Add")]
         public async Task<InsertResponse> Add(AddAdsModel adsModel)
         {
@@ -296,11 +294,11 @@ namespace PassingCarApis.Controllers
                     {
                         ex.CatchIt();
                     }
-                    query = $"Select UserId from Offer Where Id = @Id";
-                    int adsuserId = await connection.QueryFirstOrDefaultAsync<int>(query, new { Id = input.OfferId });
-                    query = $@"Select AdId from Offer o
-                                            where Id = @Id";
-                    int adId = await connection.QueryFirstOrDefaultAsync<int>(query, new { Id = input.OfferId });
+                     query = $"Select UserId from Offer Where Id = @Id";
+                     int adsuserId = await connection.QueryFirstOrDefaultAsync<int>(query, new { Id = input.OfferId });
+                     query = $@"Select AdId from Offer o
+                                             where Id = @Id";
+                     int adId = await connection.QueryFirstOrDefaultAsync<int>(query, new { Id = input.OfferId });
                     query = $"Select Title from Ads Where Id = @Id";
                     string adsTitle = await connection.QueryFirstOrDefaultAsync<string>(query, new { Id = adId });
 
@@ -1040,6 +1038,7 @@ namespace PassingCarApis.Controllers
             }
             return false;
         }
+
         [HttpPost(Name = "GetNextAds")]
         public async Task<GetNextAdsResponse> GetNextAds(GetNextAdsInput input)
         {
@@ -1177,6 +1176,222 @@ namespace PassingCarApis.Controllers
                 await connection.CloseAsync(); // Use async Close
             }
         }
+
+        [HttpGet(Name = "GetMyAds")]
+        public async Task<GetNextAdsResponse> GetMyAds()
+        {
+            GetNextAdsResponse response = new();
+            UserIdAndProfile loggedUser = await GetUserIdAndProfileAsync();
+            System.Diagnostics.Debug.WriteLine($"[API] GetMyAds called by user {loggedUser.Id}");
+            
+            if (loggedUser.Id <= 0)
+            {
+                response.Success = false;
+                response.ErrorMessage = "You must be logged in!";
+                return response;
+            }
+
+            using SqlConnection connection = AppConfiguration.GetConnection();
+            await connection.OpenAsync();
+            try
+            {
+                // Simple query to get only logged-in user's ads with photos
+                string query = @"SELECT TOP 50
+                                    COALESCE(a.Photo1, a.Photo2, a.Photo3, a.Photo4) AS FirstAdsImage,
+                                    a.Title as AdsTitle,
+                                    0 as IsFavorite,
+                                    a.Id as AdsId,
+                                    a.State as State,
+                                    a.[From] as AdsFrom,
+                                    a.[To] as AdsTo,
+                                    a.Price as AdsPrice,
+                                    u.Photo as UserProfilePhoto,
+                                    a.UserProfile,
+                                    u.Name as UserName,
+                                    u.Id as UserId,
+                                    a.CreatedAt as PostedTime,
+                                    a.ModifiedAt,
+                                    -1 as UserRating
+                                FROM Ads a WITH (NOLOCK)
+                                LEFT JOIN [User] u WITH (NOLOCK) ON a.UserId = u.ID
+                                WHERE a.UserId = @UserId
+                                ORDER BY a.CreatedAt DESC";
+                
+                var parameters = new { 
+                    UserId = loggedUser.Id
+                };
+                
+                var adsItems = (await connection.QueryAsync<AdFromAdsListModel>(query, parameters)).ToList();
+
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyAds query returned {adsItems.Count} items for user {loggedUser.Id}");
+
+                response = new GetNextAdsResponse()
+                {
+                    Success = true,
+                    ErrorMessage = string.Empty,
+                    AdsItem = adsItems
+                };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ex.CatchIt();
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                return response;
+            }
+            finally
+            {
+                await connection.CloseAsync();
+            }
+        }
+
+        [HttpGet(Name = "GetAllUsersAds")]
+        public async Task<GetNextAdsResponse> GetAllUsersAds()
+        {
+            GetNextAdsResponse response = new();
+            UserIdAndProfile loggedUser = await GetUserIdAndProfileAsync();
+            System.Diagnostics.Debug.WriteLine($"[API] GetAllUsersAds called by user {loggedUser.Id}");
+            
+            if (loggedUser.Id <= 0)
+            {
+                response.Success = false;
+                response.ErrorMessage = "You must be logged in!";
+                return response;
+            }
+
+            using SqlConnection connection = AppConfiguration.GetConnection();
+            await connection.OpenAsync();
+            try
+            {
+        // Lightweight query to get all users' ads (similar to GetMyAds but for all users)
+        string query = @"SELECT TOP 50
+                                    COALESCE(a.Photo1, a.Photo2, a.Photo3, a.Photo4) AS FirstAdsImage,
+                                    a.Title as AdsTitle,
+                                    0 as IsFavorite,
+                                    a.Id as AdsId,
+                                    a.State as State,
+                                    a.[From] as AdsFrom,
+                                    a.[To] as AdsTo,
+                                    a.Price as AdsPrice,
+                                    u.Photo as UserProfilePhoto,
+                                    a.UserProfile,
+                                    u.Name as UserName,
+                                    u.Id as UserId,
+                                    a.CreatedAt as PostedTime,
+                                    a.ModifiedAt,
+                                    -1 as UserRating
+                                FROM Ads a WITH (NOLOCK)
+                                LEFT JOIN [User] u WITH (NOLOCK) ON a.UserId = u.ID
+                                ORDER BY a.CreatedAt DESC";
+
+        var parameters = new { 
+                    UserId = loggedUser.Id,
+                    UserProfile = loggedUser.Profile.ToString()
+                };
+                
+                var adsItems = (await connection.QueryAsync<AdFromAdsListModel>(query, parameters)).ToList();
+
+                System.Diagnostics.Debug.WriteLine($"[API] GetAllUsersAds query returned {adsItems.Count} items for user {loggedUser.Id}");
+
+                response = new GetNextAdsResponse()
+                {
+                    Success = true,
+                    ErrorMessage = string.Empty,
+                    AdsItem = adsItems
+                };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ex.CatchIt();
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                return response;
+            }
+            finally
+            {
+                await connection.CloseAsync();
+            }
+        }
+
+        [HttpGet(Name = "GetMyOffersAds")]
+        public async Task<GetNextAdsResponse> GetMyOffersAds()
+        {
+            GetNextAdsResponse response = new();
+            UserIdAndProfile loggedUser = await GetUserIdAndProfileAsync();
+            System.Diagnostics.Debug.WriteLine($"[API] GetMyOffersAds called by user {loggedUser.Id}");
+            
+            if (loggedUser.Id <= 0)
+            {
+                response.Success = false;
+                response.ErrorMessage = "You must be logged in!";
+                return response;
+            }
+
+            using SqlConnection connection = AppConfiguration.GetConnection();
+            await connection.OpenAsync();
+            try
+            {
+                // Query to get ads where driver has made offers but payment is still pending
+                string query = @"SELECT TOP 50
+                                    COALESCE(a.Photo1, a.Photo2, a.Photo3, a.Photo4) AS FirstAdsImage,
+                                    a.Title as AdsTitle,
+                                    0 as IsFavorite,
+                                    a.Id as AdsId,
+                                    a.State as State,
+                                    a.[From] as AdsFrom,
+                                    a.[To] as AdsTo,
+                                    a.Price as AdsPrice,
+                                    u.Photo as UserProfilePhoto,
+                                    a.UserProfile,
+                                    CASE WHEN (a.UserProfile IS NULL OR a.UserProfile = '0' OR a.UserProfile = 'Fisica') 
+                                         THEN u.Name
+                                         ELSE ISNULL(JSON_VALUE(u.JuridicDetails, '$.CompanyName'), '') END as UserName,
+                                    u.Id as UserId,
+                                    a.CreatedAt as PostedTime,
+                                    a.ModifiedAt,
+                                    -1 as UserRating
+                                FROM Ads a WITH (NOLOCK)
+                                INNER JOIN Offer o WITH (NOLOCK) ON a.Id = o.AdId
+                                LEFT JOIN [User] u WITH (NOLOCK) ON a.UserId = u.ID
+                                WHERE o.UserId = @UserId 
+                                  AND o.UserProfile = @UserProfile
+                                  AND o.State IN (0, 1, 2)  -- Pending, Sent, Seen (not PaymentPending, Accepted, Rejected, Canceled)
+                                ORDER BY o.CreatedAt DESC";
+
+                var parameters = new { 
+                    UserId = loggedUser.Id,
+                    UserProfile = loggedUser.Profile
+                };
+                
+                var adsItems = (await connection.QueryAsync<AdFromAdsListModel>(query, parameters)).ToList();
+
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyOffersAds query returned {adsItems.Count} items for user {loggedUser.Id}");
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyOffersAds - User {loggedUser.Id} has offers on {adsItems.Count} ads");
+
+                response = new GetNextAdsResponse()
+                {
+                    Success = true,
+                    ErrorMessage = string.Empty,
+                    AdsItem = adsItems
+                };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ex.CatchIt();
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyOffersAds ERROR: {ex.Message}");
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                return response;
+            }
+            finally
+            {
+                await connection.CloseAsync();
+            }
+        }
+
         [HttpPost(Name = "CheckAdsUpdates")]
         public async Task<GetNextAdsResponse> CheckAdsUpdates(CheckAdsUpdatesInput input)
         {
@@ -1456,7 +1671,7 @@ namespace PassingCarApis.Controllers
                                 try
                                 {
                                     query = $@"Select Distinct
-                                    CASE WHEN (o.UserProfile is null OR o.UserProfile = '0' OR o.UserProfile = 'Fisica') THEN  CONCAT(u.Name,' ',u.Surname)
+                                    CASE WHEN (o.UserProfile is null OR o.UserProfile = 0 OR o.UserProfile = 1) THEN  CONCAT(u.Name,' ',u.Surname)
                                     ELSE ISNULL(JSON_VALUE(u.JuridicDetails, '$.CompanyName'), '') end as UserName,
                                     u.Photo as UserProfilePhoto,
                                     CASE WHEN (SELECT AVG(Rating + 0.0)   FROM [dbo].[Review]   where ReviewedUserId = u.Id AND ReviewedUserProfile = o.UserProfile) is null THEN -1
@@ -1627,7 +1842,7 @@ namespace PassingCarApis.Controllers
 									AND UserId = @UserId AND UserProfile =  @UserProfile ";
 
 
-                    IEnumerable<AdsParent> adsWithOffers = await connection.QueryAsync<AdsParent>(query, new { UserProfile = loggedUser.Profile.ToString(), UserId = loggedUser.Id });
+                    IEnumerable<AdsParent> adsWithOffers = await connection.QueryAsync<AdsParent>(query, new { UserProfile = loggedUser.Profile, UserId = loggedUser.Id });
                     if (adsWithOffers != null && adsWithOffers.Count() > 0)
                     {
                         foreach (AdsParent ad in adsWithOffers)
@@ -1635,7 +1850,7 @@ namespace PassingCarApis.Controllers
                             try
                             {
                                 query = $@"Select Distinct
-                                    CASE WHEN (o.UserProfile is null OR o.UserProfile = '0' OR o.UserProfile = 'Fisica') THEN  CONCAT(u.Name,' ',u.Surname)
+                                    CASE WHEN (o.UserProfile is null OR o.UserProfile = 0 OR o.UserProfile = 1) THEN  CONCAT(u.Name,' ',u.Surname)
                                     ELSE ISNULL(JSON_VALUE(u.JuridicDetails, '$.CompanyName'), '') end as UserName,
                                    NULL as UserProfilePhoto,
                                     CASE WHEN (SELECT AVG(Rating + 0.0)   FROM [dbo].[Review]   where ReviewedUserId = u.Id AND ReviewedUserProfile = o.UserProfile) is null THEN -1
@@ -1662,8 +1877,9 @@ namespace PassingCarApis.Controllers
                                             left
                                             join [User] u
                                             on o.UserId = u.Id
-                                            where AdId = @AdsId AND u.Id = @UserId AND o.UserProfile = @UserProfile";
-                                        ad.OffersGroups[indexOfGroup].Offers = (await connection.QueryAsync<OfferDetails>(query, new { ad.AdsId, group.UserId, UserProfile = group.UserProfile.ToString() })).ToList();
+                                            where AdId = @AdsId AND u.Id = @UserId ";
+                   var prof= ((int)group.UserProfile);
+                                        ad.OffersGroups[indexOfGroup].Offers = (await connection.QueryAsync<OfferDetails>(query, new { ad.AdsId, group.UserId })).ToList();
                                         if (ad.OffersGroups[indexOfGroup].Offers != null && ad.OffersGroups[indexOfGroup].Offers.Count > 0)
                                         {
                                             IEnumerable<OfferDetails> acceptedOffers = ad.OffersGroups[indexOfGroup].Offers.Where(o => o.State is OfferState.Accepted or OfferState.PaymentPending);

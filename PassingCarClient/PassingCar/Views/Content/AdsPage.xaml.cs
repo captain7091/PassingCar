@@ -175,8 +175,9 @@ namespace PassingCar.Views
                 SmallLoading.IsVisible = true;
                 AdsLibrary.KeepLoading = true;
                 
-                await AdsLibrary.CustomLoad(_adsFilter);
-                base.OnAppearing();
+                // Use new lightweight API for Anuncios screen
+                await LoadAnunciosAds();
+                //base.OnAppearing();
             }
             catch (Exception ex)
             {
@@ -193,6 +194,68 @@ namespace PassingCar.Views
             catch (Exception ex)
             {
                 _ = ex.Handle();
+            }
+        }
+
+        private async Task LoadAnunciosAds()
+        {
+            try
+            {
+                
+                // Call new lightweight API
+                GetNextAdsResponse response = await Api.GetAllUsersAds();
+                
+                if (response?.Success == true && response.AdsItem != null && response.AdsItem.Any())
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AdsPage] Received {response.AdsItem.Count()} ads from GetAllUsersAds API");
+                    
+                    // Clear existing ads
+                    AdsLibrary.Adss.Clear();
+                    AdsLibrary.AllAds.Clear();
+                    
+                    // Convert API response to local ads format
+                    foreach (var item in response.AdsItem)
+                    {
+                        AdsDetailsExtened adsDetails = new AdsDetailsExtened(false)
+                        {
+                            FirstAdsImage = item.FirstAdsImage,
+                            AdsTitle = item.AdsTitle,
+                            IsFavorite = item.IsFavorite,
+                            AdsId = item.AdsId,
+                            AdsFrom = item.AdsFrom,
+                            AdsTo = item.AdsTo,
+                            AdsPrice = item.AdsPrice,
+                            State = item.State.Espana(),
+                            UserProfilePhoto = item.UserProfilePhoto,
+                            UserProfile = item.UserProfile,
+                            UserName = item.UserName,
+                            UserRating = item.UserRating,
+                            PostedTime = item.PostedTime,
+                            UserId = item.UserId,
+                            ModifiedAt = item.ModifiedAt,
+                        };
+                        
+                        AdsLibrary.Adss.Add(adsDetails);
+                        AdsLibrary.AllAds.Add(adsDetails);
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"[AdsPage] Successfully loaded {AdsLibrary.Adss.Count} ads into UI");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AdsPage] No ads received or API failed: {response?.ErrorMessage}");
+                    AdsLibrary.Adss.Clear();
+                    AdsLibrary.AllAds.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AdsPage] Error loading Anuncios ads: {ex.Message}");
+                _ = ex.Handle();
+            }
+            finally
+            {
+                SmallLoading.IsVisible = false;
             }
         }
 
@@ -372,7 +435,9 @@ namespace PassingCar.Views
                 price_range_picker.SelectedIndex = -1;
                 this.OpenPopUp();
                 AdsLibrary.Adss.Clear();
-                await AdsLibrary.CustomLoad(_adsFilter);
+                
+                // Use lightweight API for reset
+                await LoadAnunciosAds();
                 this.ClosePopUp();
             }
             catch (Exception ex)
@@ -406,7 +471,9 @@ namespace PassingCar.Views
 
                 this.OpenPopUp();
                 AdsLibrary.Adss.Clear();
-                await AdsLibrary.CustomLoad(_adsFilter);
+                
+                // Use lightweight API for apply filters
+                await LoadAnunciosAds();
                 this.ClosePopUp();
             }
             catch (Exception ex)

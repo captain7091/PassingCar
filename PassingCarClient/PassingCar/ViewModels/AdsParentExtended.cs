@@ -60,18 +60,26 @@ namespace PassingCar.ViewModels
                 //handle exception
                 if (hiddenOffersGroup != null)
                 {
+                    // Show offers (from hidden to visible)
                     foreach (GroupOffersDetailsExtended item in hiddenOffersGroup)
                     {
-                        OffersGroupEx.Add(item);
+                        if (item != null)
+                        {
+                            OffersGroupEx.Add(item);
+                        }
                     }
                     hiddenOffersGroup = null;
                 }
                 else
                 {
+                    // Hide offers (from visible to hidden)
                     hiddenOffersGroup = new ObservableCollection<GroupOffersDetailsExtended>();
                     foreach (GroupOffersDetailsExtended item in OffersGroupEx)
                     {
-                        hiddenOffersGroup.Add(item);
+                        if (item != null)
+                        {
+                            hiddenOffersGroup.Add(item);
+                        }
                     }
                     OffersGroupEx.Clear();
                 }
@@ -79,7 +87,10 @@ namespace PassingCar.ViewModels
                 {
                     foreach (OfferDetailsExtended item in hiddenSentOffers)
                     {
-                        SentOffersEx.Add(item);
+                        if (item != null)
+                        {
+                            SentOffersEx.Add(item);
+                        }
                     }
                     hiddenSentOffers = null;
                 }
@@ -98,6 +109,31 @@ namespace PassingCar.ViewModels
                 _ = ex.Handle();
             }
         }
+        
+        // New method to ensure offers are always visible by default
+        public void EnsureOffersVisible()
+        {
+            try
+            {
+                if (hiddenOffersGroup != null && hiddenOffersGroup.Count > 0)
+                {
+                    // Move offers from hidden to visible
+                    foreach (GroupOffersDetailsExtended item in hiddenOffersGroup)
+                    {
+                        if (item != null)
+                        {
+                            OffersGroupEx.Add(item);
+                        }
+                    }
+                    hiddenOffersGroup = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _ = ex.Handle();
+            }
+        }
+        
         private async void ViewThisAds()
         {
             try

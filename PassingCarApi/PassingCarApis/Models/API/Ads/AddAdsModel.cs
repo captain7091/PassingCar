@@ -1,4 +1,4 @@
-﻿namespace PassingCarApis.Models.API.Ads
+namespace PassingCarApis.Models.API.Ads
 {
     public class AddAdsModel
     {

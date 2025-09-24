@@ -92,13 +92,14 @@ namespace PassingCar.ViewModels
             {
                 smallLoading.IsVisible = true;
                 // Removed artificial delay for instant response
-                //handle exception
+                //handle ChangeOfferState
                 filter.Active = true;
                 filter.OnlyOwnAds = true;
                 filter.OnlyFavorites = false;
                 DateTime reqTime = DateTime.Now;
                 List<LocalDatabase.LocalAd> localAds = await App.LocalDatabase.GetAdsForCheck(filter);
-                GetNextAdsResponse updatedAds = await Api.CheckAdsUpdates(localAds);
+                // COMMENTED OUT: Using new GetMyAds API instead
+                 GetNextAdsResponse updatedAds = await Api.CheckAdsUpdates(localAds);
                 localAds = await localAds.Update(updatedAds);
                 if (localAds != null && localAds.Any())
                 {

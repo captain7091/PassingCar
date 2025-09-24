@@ -1,4 +1,4 @@
-﻿using PassingCar.Extensions;
+using PassingCar.Extensions;
 using PassingCar.Hubs;
 using PassingCar.IntegrationsWithApi;
 using PassingCar.Models.API.Chat;
@@ -118,27 +118,42 @@ namespace PassingCar.Models.API.Ads
                 this.OpeErrorPopUp("Cannot open this page", ex.Message, "Ok");
             }
         }
-        private void ShowHideOffers()
+    private void ShowHideOffers()
+    {
+      try
+      {
+        if (hiddenOffersGroup != null && hiddenOffersGroup.Count > 0)
         {
-            if (hiddenOffersGroup != null)
+          // Show offers (from hidden to visible)
+          foreach (OfferDetailsExtended item in hiddenOffersGroup)
+          {
+            if (item != null) // Null check
             {
-                foreach (OfferDetailsExtended item in hiddenOffersGroup)
-                {
-                    GroupOffers.Add(item);
-                }
-                hiddenOffersGroup = null;
+              GroupOffers.Add(item);
             }
-            else
-            {
-                hiddenOffersGroup = new ObservableCollection<OfferDetailsExtended>();
-                foreach (OfferDetailsExtended item in GroupOffers)
-                {
-                    hiddenOffersGroup.Add(item);
-                }
-                GroupOffers.Clear();
-            }
+          }
+          hiddenOffersGroup = null;
         }
-        public ImageSource UserProfilePhotoImg => UserProfilePhoto != null && UserProfilePhoto.Length > 0
+        else
+        {
+          // Hide offers (from visible to hidden)
+          hiddenOffersGroup = new ObservableCollection<OfferDetailsExtended>();
+          foreach (OfferDetailsExtended item in GroupOffers)
+          {
+            if (item != null) // Null check
+            {
+              hiddenOffersGroup.Add(item);
+            }
+          }
+          GroupOffers.Clear();
+        }
+      }
+      catch (Exception ex)
+      {
+        _ = ex.Handle();
+      }
+    }
+    public ImageSource UserProfilePhotoImg => UserProfilePhoto != null && UserProfilePhoto.Length > 0
                     ? ImageSource.FromStream(() => new MemoryStream(UserProfilePhoto))
                     : ImageSource.FromResource($"PassingCar.Resources.Images.img_account.png");
         public ImageSource UserStar1 => GetStarImage(1);
@@ -174,7 +189,6 @@ namespace PassingCar.Models.API.Ads
             State = offer.State;
             CreatedAt = offer.CreatedAt;
             OnOffersChanged += UpdateBtnVisibility;
-
         }
         public ICommand AcceptCommand => new Command(AcceptOffer);
         private async void AcceptOffer()

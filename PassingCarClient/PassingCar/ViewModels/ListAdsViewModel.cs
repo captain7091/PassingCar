@@ -136,7 +136,8 @@ namespace PassingCar.ViewModels
                 AdsFilter.ShowAllUsers = filter.ShowAllUsers;
                 DateTime reqTime = DateTime.Now;
                 List<LocalDatabase.LocalAd> localAds = await App.LocalDatabase.GetAdsForCheck(filter);
-                GetNextAdsResponse updatedAds = await Api.CheckAdsUpdates(localAds);
+                // COMMENTED OUT: Using new GetMyAds API instead
+                 GetNextAdsResponse updatedAds = await Api.CheckAdsUpdates(localAds);
                 localAds = await localAds.Update(updatedAds);
                 Adss.Clear();
                 AllAds.Clear();
@@ -197,7 +198,8 @@ namespace PassingCar.ViewModels
                 //handle exception
                 Adss.Clear();
                 List<LocalDatabase.LocalAd> localAds = await App.LocalDatabase.GetAllFavoiteAds();
-                GetNextAdsResponse updatedAds = await Api.CheckAdsUpdates(localAds);
+                // COMMENTED OUT: Using new GetMyAds API instead
+                 GetNextAdsResponse updatedAds = await Api.CheckAdsUpdates(localAds);
                 localAds = await localAds.Update(updatedAds);
                 if (localAds != null && localAds.Any())
                 {
@@ -269,7 +271,8 @@ namespace PassingCar.ViewModels
             {
                 //handle exception
                 List<LocalDatabase.LocalAd> localAds = await App.LocalDatabase.GetAllMyAds();
-                GetNextAdsResponse updatedAds = await Api.CheckAdsUpdates(localAds);
+                // COMMENTED OUT: Using new GetMyAds API instead
+                 GetNextAdsResponse updatedAds = await Api.CheckAdsUpdates(localAds);
                 localAds = await localAds.Update(updatedAds);
                 AllAds.Clear();
                 if (localAds != null && localAds.Any())

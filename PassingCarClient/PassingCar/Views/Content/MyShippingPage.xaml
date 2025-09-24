@@ -12,16 +12,18 @@
         <AbsoluteLayout BackgroundColor="Transparent" x:Name="myshipping_page">
 
 
-            <ContentView x:Name="Entregados" IsVisible="False" Margin="0,155,0,0" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
-                <CollectionView
-x:Name="collectionview_ads"
-SelectionMode="None"
-ItemsSource="{Binding Adss}"
-VerticalOptions="FillAndExpand"
-RemainingItemsThreshold="5"
-        
-RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
-         >
+            <!-- CollectionView for Mis Ofertas tab (ads) -->
+            <CollectionView
+                x:Name="collectionview_ads"
+                Margin="0,155,0,0"
+                AbsoluteLayout.LayoutBounds="0,0,1,1"
+                AbsoluteLayout.LayoutFlags="All"
+                SelectionMode="None"
+                ItemsSource="{Binding Adss}"
+                VerticalOptions="FillAndExpand"
+                RemainingItemsThreshold="5"
+                RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
+                IsVisible="False">
 
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
@@ -156,8 +158,20 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
                             </ContentView>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
-                    <CollectionView.Footer>
-                        <controls:LoadingSmall 
+                <CollectionView.Header>
+                    <Frame Padding="0" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,10,0,0" BackgroundColor="Transparent">
+                        <Grid ColumnDefinitions="auto,auto,auto">
+                            <Button x:FieldModifier="public" BackgroundColor="#fe4040" x:Name="Publicados2" Clicked="Button_Clicked" CornerRadius="0" HorizontalOptions="Fill" Text="Mis ofertas"></Button>
+                            <Rectangle Fill="Black" HorizontalOptions="Center" ZIndex="2" Grid.Column="0" WidthRequest="2" Margin="0,5,0,5" Grid.ColumnSpan="2"></Rectangle>
+                            <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="En_Ruta2" Clicked="Button_Clicked_1" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="En Ruta" Grid.Column="1"></Button>
+                            <Rectangle Fill="Black" HorizontalOptions="Center" Grid.Column="1" WidthRequest="2" Margin="0,5,0,5" ZIndex="2" Grid.ColumnSpan="2"></Rectangle>
+                            <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="Enviados2" Clicked="Button_Clicked_2" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="Entregados" Grid.Column="2"></Button>
+                        </Grid>
+                    </Frame>
+                </CollectionView.Header>
+
+                <CollectionView.Footer>
+                    <controls:LoadingSmall 
                 IsVisible="True"
                     VerticalOptions="StartAndExpand"
                     BackgroundColor="Transparent" HeightRequest="70" x:Name="SmallLoading1">
@@ -168,8 +182,8 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
 
                 </CollectionView>
 
-
-            </ContentView>
+            <!-- ContentView for Entregados tab -->
+            <ContentView x:Name="Entregados" IsVisible="False" Margin="0,155,0,0" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
 
 
 
@@ -610,9 +624,7 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
                 </CollectionView.EmptyView>
             </CollectionView>
             
-            
-            
-            
+            </ContentView>
             
             <Grid x:Name="grid_context" Margin="0,0,0,0" AbsoluteLayout.LayoutBounds="0,0,1,0.09" AbsoluteLayout.LayoutFlags="All" BackgroundColor="Transparent">
                 <Grid.RowDefinitions>

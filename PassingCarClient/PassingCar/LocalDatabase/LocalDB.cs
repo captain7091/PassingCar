@@ -43,47 +43,48 @@ namespace PassingCar.LocalDatabase
                     Filter = filter
                 };
 
-                System.Diagnostics.Debug.WriteLine($"[LocalDB] GetNewAds called with maxId: {maxId}");
-                GetNextAdsResponse result = await Api.GetNextAds(input);
-                System.Diagnostics.Debug.WriteLine($"[LocalDB] API response success: {result?.Success}, Items count: {result?.AdsItem?.Count() ?? 0}");
-                while (result != null && result.AdsItem != null && result.AdsItem.Any())
-                {
-                    loaded = true;
-                    input.LastAdsLoaded = result.AdsItem.Select(a => a.AdsId).Max();
-                    List<LocalAd> localNewAds = new List<LocalAd>();
-                    foreach (AdFromAdsListModel item in result.AdsItem)
-                    {
-                        AdsDetailsExtened adsDetails = new AdsDetailsExtened(false)
-                        {
-                            FirstAdsImage = item.FirstAdsImage,
-                            AdsTitle = item.AdsTitle,
-                            IsFavorite = item.IsFavorite,
-                            AdsId = item.AdsId,
-                            AdsFrom = item.AdsFrom,
-                            AdsTo = item.AdsTo,
-                            AdsPrice = item.AdsPrice,
-                            State = item.State.Espana(),
-                            UserProfilePhoto = item.UserProfilePhoto,
-                            UserProfile = item.UserProfile,
-                            UserName = item.UserName,
-                            UserRating = item.UserRating,
-                            PostedTime = item.PostedTime,
-                            UserId = item.UserId,
-                            ModifiedAt = item.ModifiedAt,
-                        };
-                        try
-                        {
-                            LocalAd asdsad = new LocalAd(adsDetails, item.State, item.UserId, item.ModifiedAt);
-                            localNewAds.Add(asdsad);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.ToString());
-                        }
-                    }
-                    _ = await App.LocalDatabase.SaveAds(localNewAds);
-                    result = await Api.GetNextAds(input);
-                }
+                // COMMENTED OUT: Using new GetMyAds API instead
+                // System.Diagnostics.Debug.WriteLine($"[LocalDB] GetNewAds called with maxId: {maxId}");
+                // GetNextAdsResponse result = await Api.GetNextAds(input);
+                // System.Diagnostics.Debug.WriteLine($"[LocalDB] API response success: {result?.Success}, Items count: {result?.AdsItem?.Count() ?? 0}");
+                // while (result != null && result.AdsItem != null && result.AdsItem.Any())
+                // {
+                //     loaded = true;
+                //     input.LastAdsLoaded = result.AdsItem.Select(a => a.AdsId).Max();
+                //     List<LocalAd> localNewAds = new List<LocalAd>();
+                //     foreach (AdFromAdsListModel item in result.AdsItem)
+                //     {
+                //         AdsDetailsExtened adsDetails = new AdsDetailsExtened(false)
+                //         {
+                //             FirstAdsImage = item.FirstAdsImage,
+                //             AdsTitle = item.AdsTitle,
+                //             IsFavorite = item.IsFavorite,
+                //             AdsId = item.AdsId,
+                //             AdsFrom = item.AdsFrom,
+                //             AdsTo = item.AdsTo,
+                //             AdsPrice = item.AdsPrice,
+                //             State = item.State.Espana(),
+                //             UserProfilePhoto = item.UserProfilePhoto,
+                //             UserProfile = item.UserProfile,
+                //             UserName = item.UserName,
+                //             UserRating = item.UserRating,
+                //             PostedTime = item.PostedTime,
+                //             UserId = item.UserId,
+                //             ModifiedAt = item.ModifiedAt,
+                //         };
+                //         try
+                //         {
+                //             LocalAd asdsad = new LocalAd(adsDetails, item.State, item.UserId, item.ModifiedAt);
+                //             localNewAds.Add(asdsad);
+                //         }
+                //         catch (Exception ex)
+                //         {
+                //             Console.WriteLine(ex.ToString());
+                //         }
+                //     }
+                //     _ = await App.LocalDatabase.SaveAds(localNewAds);
+                //     result = await Api.GetNextAds(input);
+                // }
                 return loaded;
             }
             catch (Exception ex)

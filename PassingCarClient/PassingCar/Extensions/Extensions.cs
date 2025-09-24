@@ -1,8 +1,11 @@
 using Newtonsoft.Json;
+using PassingCar;
 using PassingCar.IntegrationsWithApi;
 using PassingCar.LocalDatabase;
 using PassingCar.Models.API.Ads;
+using PassingCar.Models.API;
 using PassingCar.ViewModels;
+using PassingCar.Views.Content;
 
 using System;
 using System.Collections.Generic;
@@ -10,6 +13,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 
 namespace PassingCar.Extensions
@@ -135,42 +139,91 @@ namespace PassingCar.Extensions
         {
             try
             {
-                //new { }.OpenPopUp();
-                //LocalAd item = await GetAdByID(adsId);
-                //if (item != null)
-                //{
-                //    AdsDetailsExtened adsDetailsExtened = new AdsDetailsExtened(false)
-                //    {
-                //        FirstAdsImage = item.GetFirstPhoto(),
-                //        AdsTitle = item.AdsTitle,
-                //        IsFavorite = item.IsFavorite,
-                //        AdsId = item.Id,
-                //        AdsFrom = item.AdsFrom,
-                //        AdsTo = item.AdsTo,
-                //        AdsPrice = item.AdsPrice,
-                //        State = item.State.ToString(),
-                //        UserProfilePhoto = item.GetUserProfilePhoto(),
-                //        UserName = item.Username,
-                //        UserRating = item.UserRating,
-                //        PostedTime = item.PostedTime,
-                //        UserProfile = item.UserProfile,
-                //        UserId = item.UserId,
-                //        ModifiedAt = item.ModifiedAt,
-                //    };
+                new { }.OpenPopUp();
+                LocalAd item = await App.LocalDatabase.GetAdByID(adsId);
+                if (item != null)
+                {
+                    AdsDetailsExtened adsDetailsExtened = new AdsDetailsExtened(false)
+                    {
+                        FirstAdsImage = item.GetFirstPhoto(),
+                        AdsTitle = item.AdsTitle,
+                        IsFavorite = item.IsFavorite,
+                        AdsId = item.Id,
+                        AdsFrom = item.AdsFrom,
+                        AdsTo = item.AdsTo,
+                        AdsPrice = item.AdsPrice,
+                        State = item.State.ToString(),
+                        UserProfilePhoto = item.GetUserProfilePhoto(),
+                        UserName = item.Username,
+                        UserRating = item.UserRating,
+                        PostedTime = item.PostedTime,
+                        UserProfile = item.UserProfile,
+                        UserId = item.UserId,
+                        ModifiedAt = item.ModifiedAt,
+                    };
 
-                //    SingleAdsViewModel modelBinding = new SingleAdsViewModel(adsDetailsExtened);
-                //    await modelBinding.AsyncLoad();
-                //    SingleAdsPage singleAdsPage = new SingleAdsPage(modelBinding);
+                    SingleAdsViewModel modelBinding = new SingleAdsViewModel(adsDetailsExtened);
+                    await modelBinding.AsyncLoad();
+                    SingleAdsPage singleAdsPage = new SingleAdsPage(modelBinding);
 
-                //    new { }.ClosePopUp();
-                //    await App.Current.MainPage.Navigation.PushAsync(singleAdsPage);
-                //}
-                //else
-                //{
-                //    new { }.ClosePopUp();
-                //    await Task.Delay(500);
-                //    new { }.OpeErrorPopUp($"Unable to get data for this Ads", $"Inténtalo de nuevo", $"Ok");
-                //}
+                    new { }.ClosePopUp();
+                    await App.Current.MainPage.Navigation.PushAsync(singleAdsPage);
+                }
+                else
+                {
+                    // Ad not found in local database - fetch from API
+                    System.Diagnostics.Debug.WriteLine($"[GoToAds] Ad {adsId} not found in local database, fetching from API...");
+                    
+                    // Try to get ad details from GetAllUsersAds API
+                    var allUsersAdsResponse = await Api.GetAllUsersAds();
+                    
+                    if (allUsersAdsResponse != null && allUsersAdsResponse.Success && allUsersAdsResponse.AdsItem != null)
+                    {
+                        var adFromApi = allUsersAdsResponse.AdsItem.FirstOrDefault(ad => ad.AdsId == adsId);
+                        
+                        if (adFromApi != null)
+                        {
+                            // Create AdsDetailsExtened from API response
+                            var adsDetailsExtened = new AdsDetailsExtened(false)
+                            {
+                                FirstAdsImage = adFromApi.FirstAdsImage,
+                                AdsTitle = adFromApi.AdsTitle,
+                                IsFavorite = adFromApi.IsFavorite,
+                                AdsId = adFromApi.AdsId,
+                                AdsFrom = adFromApi.AdsFrom,
+                                AdsTo = adFromApi.AdsTo,
+                                AdsPrice = adFromApi.AdsPrice,
+                                State = adFromApi.State.Espana(),
+                                UserProfilePhoto = adFromApi.UserProfilePhoto,
+                                UserName = adFromApi.UserName,
+                                UserRating = adFromApi.UserRating,
+                                PostedTime = adFromApi.PostedTime,
+                                UserProfile = adFromApi.UserProfile,
+                                UserId = adFromApi.UserId,
+                                ModifiedAt = adFromApi.ModifiedAt,
+                            };
+
+                            SingleAdsViewModel modelBinding = new SingleAdsViewModel(adsDetailsExtened);
+                            await modelBinding.AsyncLoad();
+                            SingleAdsPage singleAdsPage = new SingleAdsPage(modelBinding);
+
+                            new { }.ClosePopUp();
+                            await App.Current.MainPage.Navigation.PushAsync(singleAdsPage);
+                        }
+                        else
+                        {
+                            new { }.ClosePopUp();
+                            await Task.Delay(500);
+                            new { }.OpeErrorPopUp($"Ad not found", $"This ad is no longer available", $"Ok");
+                        }
+                    }
+                    else
+                    {
+                        new { }.ClosePopUp();
+                        await Task.Delay(500);
+                        new { }.OpeErrorPopUp($"Unable to get data for this Ads", $"Inténtalo de nuevo", $"Ok");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -178,9 +231,9 @@ namespace PassingCar.Extensions
                 {
                     Exception = JsonConvert.SerializeObject(ex)
                 });
-                //new { }.ClosePopUp();
-                //await Task.Delay(500);
-                //new { }.OpeErrorPopUp($"Unable to get data for this Ads", $"Inténtalo de nuevo", $"Ok");
+                new { }.ClosePopUp();
+                await Task.Delay(500);
+                new { }.OpeErrorPopUp($"Unable to get data for this Ads", $"Inténtalo de nuevo", $"Ok");
             }
         }
         public static bool Handle(this Exception ex)

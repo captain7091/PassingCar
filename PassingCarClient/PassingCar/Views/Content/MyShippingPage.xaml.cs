@@ -53,16 +53,17 @@ namespace PassingCar.Views
         {
             try
             {
-                // Only load data on first appearance or if explicitly needed, not on every tab switch
-                if (!isDataLoaded)
-                {
-                    SmallLoading.IsVisible = true;
-                    await ShippingsLibrary.CustomLoad();
-                    
-                    // Images removed from UI - no longer loading images
-                    
-                    isDataLoaded = true;
-                }
+                // Set initial tab state (Mis Ofertas is default active)
+                Publicados.BackgroundColor = Color.FromHex("#fe3f40");
+                En_Ruta.BackgroundColor = Color.FromHex("#c3c3c3");
+                Enviados.BackgroundColor = Color.FromHex("#c3c3c3");
+                Publicados2.BackgroundColor = Color.FromHex("#fe3f40");
+                En_Ruta2.BackgroundColor = Color.FromHex("#c3c3c3");
+                Enviados2.BackgroundColor = Color.FromHex("#c3c3c3");
+                
+                // AUTO-LOAD Mis Ofertas tab data when screen appears (since it's the default active tab)
+                await LoadMisOfertasTabData();
+                
                 base.OnAppearing();
             }
             catch (Exception ex)
@@ -73,34 +74,126 @@ namespace PassingCar.Views
 
         private async void Button_Clicked(object sender, EventArgs e)
         {
+            // Update tab button colors for both CollectionViews
             this.En_Ruta.BackgroundColorTo(Color.FromHex("#c3c3c3"));
             Enviados.BackgroundColorTo(Color.FromHex("#c3c3c3"));
             await Publicados.BackgroundColorTo(Color.FromHex("#fe3f40"));
-
-            collectionview_shippings.IsVisible = true;
-            Entregados.IsVisible = false;
+            
+            // Update tab button colors for collectionview_ads
+            this.En_Ruta2.BackgroundColorTo(Color.FromHex("#c3c3c3"));
+            Enviados2.BackgroundColorTo(Color.FromHex("#c3c3c3"));
+            await Publicados2.BackgroundColorTo(Color.FromHex("#fe3f40"));
 
             // Show loading spinner
             SmallLoading.IsVisible = true;
 
-            // Set OnlyActive to false for Publicados tab to show all shipping items
-            // This prevents ads from disappearing when their state changes
-            ShippingsLibrary.OnlyActive = false;
-            
-            // Reload data for Publicados tab
-            await ShippingsLibrary.CustomLoad();
+            // Load Mis Ofertas tab data
+            await LoadMisOfertasTabData();
             
             // Hide loading spinner after data is loaded
             SmallLoading.IsVisible = false;
         }
 
+        private async Task LoadMisOfertasTabData()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"[MyShippingPage] LoadMisOfertasTabData called - loading driver's offers");
+                
+                // Call the new GetMyOffersAds API (for drivers to see ads where they made offers)
+                GetNextAdsResponse response = await Api.GetMyOffersAds();
+                
+                if (response != null && response.Success && response.AdsItem != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffersAds API returned {response.AdsItem.Count()} ads for Mis Ofertas tab");
+                    
+                    // Create a temporary loading control for ads display
+                    var tempLoading = new LoadingSmall();
+                    
+                    // Create a new ListAdsViewModel for ads display
+                    var adsViewModel = new ListAdsViewModel(tempLoading);
+                    
+                    // Clear existing ads
+                    adsViewModel.Adss.Clear();
+                    adsViewModel.AllAds.Clear();
+                    
+                    // Convert API response to local ads and populate the UI
+                    foreach (var item in response.AdsItem)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Processing ad: {item.AdsTitle}, AdsId: {item.AdsId}, UserProfile: {item.UserProfile}");
+                        
+                        var adDetails = new AdsDetailsExtened(false)
+                        {
+                            FirstAdsImage = item.FirstAdsImage,
+                            AdsTitle = item.AdsTitle,
+                            IsFavorite = item.IsFavorite,
+                            AdsId = item.AdsId,
+                            AdsFrom = item.AdsFrom,
+                            AdsTo = item.AdsTo,
+                            AdsPrice = item.AdsPrice,
+                            State = item.State.Espana(),
+                            UserProfilePhoto = item.UserProfilePhoto,
+                            UserProfile = item.UserProfile,
+                            UserName = item.UserName,
+                            UserRating = item.UserRating,
+                            PostedTime = item.PostedTime,
+                            UserId = item.UserId,
+                            ModifiedAt = item.ModifiedAt,
+                        };
+                        
+                        adsViewModel.Adss.Add(adDetails);
+                        adsViewModel.AllAds.Add(adDetails);
+                        
+                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Added ad to viewmodel: {adDetails.AdsTitle}, Count: {adsViewModel.Adss.Count}");
+                    }
+                    
+                    // Set the binding context to show ads in collectionview_ads
+                    collectionview_ads.BindingContext = adsViewModel;
+                    collectionview_ads.IsVisible = true;
+                    
+                    // Keep collectionview_shippings visible but empty so tabs remain visible
+                    ShippingsLibrary.Shippingss.Clear();
+                    collectionview_shippings.IsVisible = true;
+                    Entregados.IsVisible = false;
+                    
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Successfully loaded {adsViewModel.Adss.Count} ads into Mis Ofertas tab");
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] CollectionView_ads Visible: {collectionview_ads.IsVisible}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffersAds API failed: Success={response?.Success}, Error='{response?.ErrorMessage}'");
+                    // Show empty state or error message
+                    collectionview_ads.IsVisible = true;
+                    ShippingsLibrary.Shippingss.Clear();
+                    collectionview_shippings.IsVisible = true;
+                    Entregados.IsVisible = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Error loading ads for Mis Ofertas tab: {ex.Message}");
+                _ = ex.Handle();
+                collectionview_ads.IsVisible = true;
+                ShippingsLibrary.Shippingss.Clear();
+                collectionview_shippings.IsVisible = true;
+                Entregados.IsVisible = false;
+            }
+        }
+
         private async void Button_Clicked_1(object sender, EventArgs e)
         {
+            // Update tab button colors for both CollectionViews
             Publicados.BackgroundColorTo(Color.FromHex("#c3c3c3"));
             Enviados.BackgroundColorTo(Color.FromHex("#c3c3c3"));
             await En_Ruta.BackgroundColorTo(Color.FromHex("#fe3f40"));
+            
+            // Update tab button colors for collectionview_ads
+            Publicados2.BackgroundColorTo(Color.FromHex("#c3c3c3"));
+            Enviados2.BackgroundColorTo(Color.FromHex("#c3c3c3"));
+            await En_Ruta2.BackgroundColorTo(Color.FromHex("#fe3f40"));
          
             collectionview_shippings.IsVisible = true;
+            collectionview_ads.IsVisible = false;
             Entregados.IsVisible = false;
 
             // Show loading spinner
@@ -120,9 +213,15 @@ namespace PassingCar.Views
 
         private async void Button_Clicked_2(object sender, EventArgs e)
         {
-             Publicados.BackgroundColorTo(Color.FromHex("#c3c3c3"));
+            // Update tab button colors for both CollectionViews
+            Publicados.BackgroundColorTo(Color.FromHex("#c3c3c3"));
             En_Ruta.BackgroundColorTo(Color.FromHex("#c3c3c3"));
             await Enviados.BackgroundColorTo(Color.FromHex("#fe3f40"));
+            
+            // Update tab button colors for collectionview_ads
+            Publicados2.BackgroundColorTo(Color.FromHex("#c3c3c3"));
+            En_Ruta2.BackgroundColorTo(Color.FromHex("#c3c3c3"));
+            await Enviados2.BackgroundColorTo(Color.FromHex("#fe3f40"));
           
 
             // Show loading spinner
@@ -162,12 +261,14 @@ namespace PassingCar.Views
                     }
                     // Show Entregados content when data exists
                     collectionview_shippings.IsVisible = false;
+                    collectionview_ads.IsVisible = false;
                     Entregados.IsVisible = true;
                 }
                 else
                 {
                     // Show empty state card when no data (like other tabs)
                     collectionview_shippings.IsVisible = true;
+                    collectionview_ads.IsVisible = false;
                     Entregados.IsVisible = false;
                 }
             }
@@ -177,6 +278,7 @@ namespace PassingCar.Views
                 System.Diagnostics.Debug.WriteLine($"Error in Entregados tab: {ex.Message}");
                 // Show empty state on error
                 collectionview_shippings.IsVisible = true;
+                collectionview_ads.IsVisible = false;
                 Entregados.IsVisible = false;
             }
             finally

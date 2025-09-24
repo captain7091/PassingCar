@@ -198,17 +198,12 @@ namespace PassingCar.Views
 
                 System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Current User: ID={App.CurrentUser.Id}, Name='{App.CurrentUser.Name}'");
 
-                // FIRST: Check what's in the local database
-                await CheckLocalDatabase();
-
+                // NEW: Use GetMyAds API directly instead of local database approach
                 SmallLoading.IsVisible = true;
                 AdsLibrary.KeepLoading = true;
 
-                // Force refresh the local database to get latest ads
-                await ForceRefreshAds();
-
-                // Load published ads immediately without delay
-                Button_Clicked(null , null);
+                // Call new GetMyAds API
+                await LoadMyAdsFromAPI();
 
                 base.OnAppearing();
                 System.Diagnostics.Debug.WriteLine("[MyAdsPage] OnAppearing completed");
@@ -217,6 +212,77 @@ namespace PassingCar.Views
             {
                 _ = ex.Handle();
                 System.Diagnostics.Debug.WriteLine($"[MyAdsPage] OnAppearing error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Loads user's ads using the new GetMyAds API
+        /// </summary>
+        private async Task LoadMyAdsFromAPI()
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("[MyAdsPage] LoadMyAdsFromAPI started");
+
+                // Call the new GetMyAds API
+                GetNextAdsResponse response = await Api.GetMyAds();
+                
+                if (response != null && response.Success && response.AdsItem != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] GetMyAds API returned {response.AdsItem.Count()} ads");
+                    
+                    // Clear existing ads
+                    AdsLibrary.Adss.Clear();
+                    AdsLibrary.AllAds.Clear();
+                    
+                    // Convert API response to local ads and populate the UI
+                    foreach (var item in response.AdsItem)
+                    {
+                        var adDetails = new AdsDetailsExtened(false)
+                        {
+                            FirstAdsImage = item.FirstAdsImage,
+                            AdsTitle = item.AdsTitle,
+                            IsFavorite = item.IsFavorite,
+                            AdsId = item.AdsId,
+                            AdsFrom = item.AdsFrom,
+                            AdsTo = item.AdsTo,
+                            AdsPrice = item.AdsPrice,
+                            State = item.State.Espana(),
+                            UserProfilePhoto = item.UserProfilePhoto,
+                            UserProfile = item.UserProfile,
+                            UserName = item.UserName,
+                            UserRating = item.UserRating,
+                            PostedTime = item.PostedTime,
+                            UserId = item.UserId,
+                            ModifiedAt = item.ModifiedAt,
+                        };
+                        
+                        AdsLibrary.Adss.Add(adDetails);
+                        AdsLibrary.AllAds.Add(adDetails);
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Successfully loaded {AdsLibrary.Adss.Count} ads into UI");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] GetMyAds API failed: Success={response?.Success}, Error='{response?.ErrorMessage}'");
+                    // Show error message to user if needed
+                    if (!string.IsNullOrEmpty(response?.ErrorMessage))
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            DisplayAlert("Error", response.ErrorMessage, "OK");
+                        });
+                    }
+                }
+                
+                SmallLoading.IsVisible = false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] LoadMyAdsFromAPI error: {ex.Message}");
+                SmallLoading.IsVisible = false;
+                _ = ex.Handle();
             }
         }
 
@@ -590,147 +656,14 @@ namespace PassingCar.Views
                 AdsLibrary.KeepLoading = true;
 
                 var bind = BindingContext as ListAdsViewModel;
-
-                // Store current ads count before clearing
-                int currentAdsCount = bind.AllAds.Count;
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Button_Clicked - Current ads count: {currentAdsCount}");
-
                 bind.Adss.Clear();
-
-                // Force refresh to get latest ads
                 await ForceRefreshAds();
-
                 await AdsLibrary.CustomLoad(new AdsFilter()
                 {
                     OnlyOwnAds = true,
                     OnlyFavorites = false,
-                    Active = false,
-                    ShowAllUsers = false // Ensure only current user's ads are shown
+                    Active = true
                 });
-
-                // Force another refresh to ensure we have the latest data
-                await AdsLibrary.LoadMyAds();
-
-                var alladds = bind.AllAds;
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] AllAds count after CustomLoad: {alladds?.Count ?? 0}");
-
-                // Load user data and current profile
-
-                var username = await Api.GetUserData();
-                var currentProfile = await Api.GetProfile();
-                string currentProfileStr = currentProfile.ToString();
-
-                // Debug logging
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Total AllAds count: {alladds?.Count ?? 0}");
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Username: {username?.Name ?? "NULL"}");
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] User ID: {username?.Id ?? 0}");
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Current Profile: {currentProfileStr}");
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] User logged in: {username != null}");
-
-                // Debug all ads in database with detailed info
-                if (alladds != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] === ALL ADS IN DATABASE ({alladds.Count}) ===");
-                    foreach (var ad in alladds)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Ad: ID={ad.AdsId}, Title='{ad.AdsTitle}', State='{ad.State}', UserName='{ad.UserName}', UserId={ad.UserId}");
-                    }
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] === END ALL ADS ===");
-                }
-
-                // FIXED: Show only ads that belong to current user (more flexible matching)
-                var s = alladds?.Where(x =>
-                {
-                    // Check if ad belongs to current user (multiple ways, more flexible)
-                    bool isUserAd = false;
-                    if (username != null)
-                    {
-                        // Primary check: UserId match
-                        isUserAd = (x.UserId == username.Id && username.Id > 0);
-                        
-                        // Fallback checks if UserId doesn't match
-                        if (!isUserAd)
-                        {
-                            isUserAd = (!string.IsNullOrEmpty(x.UserName) && !string.IsNullOrEmpty(username.Name) && 
-                                       x.UserName.Equals(username.Name, StringComparison.OrdinalIgnoreCase)) ||
-                                      (!string.IsNullOrEmpty(x.UserName) && !string.IsNullOrEmpty(username.Email) && 
-                                       x.UserName.Equals(username.Email, StringComparison.OrdinalIgnoreCase)) ||
-                                      (!string.IsNullOrEmpty(x.UserName) && !string.IsNullOrEmpty(username.PhoneNumber) && 
-                                       x.UserName.Equals(username.PhoneNumber, StringComparison.OrdinalIgnoreCase));
-                        }
-                    }
-
-                    // RELAXED: Profile matching - be more flexible
-                    string userProfile = x.UserProfile.ToString() ?? "";
-                    
-                    // DEBUG: Log profile comparison details
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Profile Debug - Ad {x.AdsId}: UserProfile='{userProfile}' (enum: {x.UserProfile}), CurrentProfile='{currentProfileStr}' (enum: {currentProfile})");
-                    
-                    bool isCurrentProfile = string.IsNullOrEmpty(userProfile) || 
-                                          string.IsNullOrEmpty(currentProfileStr) ||
-                                          userProfile.Equals(currentProfileStr, StringComparison.OrdinalIgnoreCase) ||
-                                          userProfile.Equals("0", StringComparison.OrdinalIgnoreCase) || // Default profile
-                                          currentProfileStr.Equals("0", StringComparison.OrdinalIgnoreCase); // Default profile
-
-                    // RELAXED: State checking - accept more states
-                    bool isValidState = string.IsNullOrEmpty(x.State) || // Accept ads without state
-                                       x.State.Contains("Disponible") ||
-                                       x.State.Contains("Posted") ||
-                                       x.State.Contains("Pending") ||
-                                       x.State.Contains("Active") ||
-                                       x.State.Contains("Published") ||
-                                       x.State.Contains("Created") ||
-                                       x.State.Contains("Draft");
-
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Checking ad {x.AdsId}: isUserAd={isUserAd}, isCurrentProfile={isCurrentProfile}, UserProfile='{x.UserProfile}', CurrentProfile='{currentProfileStr}', State='{x.State}', UserId={x.UserId}, CurrentUserId={username?.Id}");
-
-                    return isUserAd && isCurrentProfile && isValidState;
-                }).ToList() ?? new List<AdsDetailsExtened>();
-
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Filtered ads count: {s.Count}");
-
-                // Diagnostic: Check why no ads are showing
-                if (s.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("[MyAdsPage] DIAGNOSIS: No ads found. Checking reasons:");
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] - Total ads in database: {alladds?.Count ?? 0}");
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] - User logged in: {username != null}");
-
-                    if (username == null)
-                    {
-                        System.Diagnostics.Debug.WriteLine("[MyAdsPage] - ISSUE: User not logged in! Please login first.");
-                    }
-                    else if (alladds?.Count == 0)
-                    {
-                        System.Diagnostics.Debug.WriteLine("[MyAdsPage] - ISSUE: No ads in database. Create an ad first.");
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("[MyAdsPage] - ISSUE: Ads exist but don't match filter criteria.");
-                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] - Looking for ads with UserName='{username.Name}' OR UserId={username.Id}");
-                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] - AND UserProfile='{currentProfileStr}'");
-                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] - And State in: Disponible, Posted, Pending");
-                    }
-                }
-
-                // Debug each filtered ad
-                foreach (var ad in s)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Filtered ad: ID={ad.AdsId}, Title={ad.AdsTitle}, State={ad.State}, UserName={ad.UserName}, UserId={ad.UserId}");
-                }
-
-                bind.Adss.Clear();
-                foreach (var item in s)
-                {
-                    bind.Adss.Add(item);
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Added ad to display: {item.AdsTitle}");
-                }
-
-                // Show message if no real ads found
-                if (s.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("[MyAdsPage] No real ads found for user");
-                }
 
                 SmallLoading.IsVisible = false;
                 AdsLibrary.KeepLoading = false;
@@ -738,6 +671,7 @@ namespace PassingCar.Views
             catch (Exception ex)
             {
                 _ = ex.Handle();
+                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Error in Button_Clicked: {ex.Message}");
                 SmallLoading.IsVisible = false;
                 AdsLibrary.KeepLoading = false;
             }
@@ -1044,6 +978,7 @@ namespace PassingCar.Views
                 _ = ex.Handle();
             }
         }
+
 
         /// <summary>
         /// Check what's actually stored in the local SQLite database and show ads immediately if available

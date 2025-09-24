@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using PassingCar.Extensions;
 using PassingCar.Hubs;
 using PassingCar.IntegrationsWithApi;
@@ -205,6 +205,7 @@ namespace PassingCar.ViewModels
         public ICommand DisableCommand => new Command(DisableAdd);
         public ICommand RepostCommand => new Command(RepostAdd);
         public ICommand ShareCommand => new Command(ShareAd);
+        //public ICommand AcceptCommand => new Command(AcceptOffer);
         public ObservableCollection<CarouselItem> CarouselItems { get; set; }
         public string NewOfferValue { get; set; }
         public SingleAdsViewModel(AdsDetailsExtened adsToShow)
@@ -423,6 +424,8 @@ namespace PassingCar.ViewModels
                 _ = ex.Handle();
             }
         }
+        // REMOVED: AcceptOffer method - This functionality is correctly implemented in OfferDetailsExtended class
+        // The AcceptOffer method should use OfferId, not AdId. The correct implementation is in GetAdsDetailsResponse.cs
         private async void NewOffer()
         {
             try
@@ -508,9 +511,24 @@ namespace PassingCar.ViewModels
                             AdsMoreDetails.OffersGroups = AdsMoreDetails.OffersGroups.OrderByDescending(og => og.Offers.Max(o => o.CreatedAt)).ToList();
                             foreach (GroupOfOffers off in AdsMoreDetails.OffersGroups)
                             {
-                                OffersGroup.Add(new GroupOffersDetailsExtended(off, UpdateSentOffers));
+                                var groupExtended = new GroupOffersDetailsExtended(off, UpdateSentOffers);
+                                OffersGroup.Add(groupExtended);
+                                
+                                // Ensure offers are visible by default
+                                if (groupExtended.GroupOffers != null && groupExtended.GroupOffers.Count > 0)
+                                {
+                                    // Force refresh of visibility properties
+                                    foreach (var offer in groupExtended.GroupOffers)
+                                    {
+                                        offer.OnPropertyChanged(nameof(offer.AcceptRejectCancelBtnVisibility));
+                                    }
+                                }
                             }
                         }
+                        
+                        // Ensure offers are visible by default
+                        EnsureOffersVisible();
+                        
                         if(AdsMoreDetails.SentOffers != null && AdsMoreDetails.SentOffers.Count > 0)
                         {
                             AdsMoreDetails.SentOffers = AdsMoreDetails.SentOffers.OrderBy(o => o.CreatedAt).ToList();
@@ -537,58 +555,69 @@ namespace PassingCar.ViewModels
         {
             try
             {
-                //handle exception
-                GetNextAdsResponse updates = await Api.CheckAdsUpdates(new System.Collections.Generic.List<LocalDatabase.LocalAd> { new LocalDatabase.LocalAd(AdsDetails, _state, AdsDetails.UserId, AdsDetails.ModifiedAt) });
-                if (updates != null && updates.Success && updates.AdsItem != null && updates.AdsItem.Any())
-                {
-                    AdFromAdsListModel item = updates.AdsItem.First();
-                    AdsDetails = new AdsDetailsExtened(false)
-                    {
-                        FirstAdsImage = item.FirstAdsImage,
-                        AdsTitle = item.AdsTitle,
-                        IsFavorite = item.IsFavorite,
-                        AdsId = item.AdsId,
-                        AdsFrom = item.AdsFrom,
-                        AdsTo = item.AdsTo,
-                        AdsPrice = item.AdsPrice,
-                        State = item.State.ToString(),
-                        UserProfilePhoto = item.UserProfilePhoto,
-                        UserName = item.UserName,
-                        UserRating = item.UserRating,
-                        PostedTime = item.PostedTime,
-                        UserId = item.UserId,
-                        UserProfile = item.UserProfile,
-                        ModifiedAt = item.ModifiedAt,
-                    };
-                }
-                GetAdsDetailsResponse getAdsDetailsResponse = await Api.GetAdsDetailsAds(new GetAdsDetailsInput()
-                {
-                    AdsId = AdsDetails.AdsId
-                });
+                // OPTIMIZATION: Only call GetAdsDetailsAds - no CheckAdsUpdates needed
+                // The ad data is already fresh from GetMyAds API
+                GetAdsDetailsResponse getAdsDetailsResponse = await Api.GetAdsDetailsAds(new GetAdsDetailsInput() { AdsId = AdsDetails.AdsId });
+                
+                // Clear collections first
                 OffersGroup.Clear();
                 SentOffers.Clear();
+                
                 if (getAdsDetailsResponse != null && getAdsDetailsResponse.AdsMoreDetails != null)
                 {
                     AdsMoreDetails = getAdsDetailsResponse.AdsMoreDetails;
-                    if (AdsMoreDetails.NextPhotos != null && AdsMoreDetails.NextPhotos.Count > 0)
+                    
+                    // OPTIMIZATION: Load images in background to avoid UI blocking
+                    _ = Task.Run(async () =>
                     {
-                        foreach (byte[] item in AdsMoreDetails.NextPhotos)
+                        if (AdsMoreDetails.NextPhotos != null && AdsMoreDetails.NextPhotos.Count > 0)
                         {
-                            CarouselItems.Add(new CarouselItem()
+                            var carouselItems = new List<CarouselItem>();
+                            foreach (byte[] item in AdsMoreDetails.NextPhotos)
                             {
-                                ImageSource = ImageSource.FromStream(() => new MemoryStream(item))
+                                carouselItems.Add(new CarouselItem()
+                                {
+                                    ImageSource = ImageSource.FromStream(() => new MemoryStream(item))
+                                });
+                            }
+                            
+                            // Update UI on main thread
+                            await MainThread.InvokeOnMainThreadAsync(() =>
+                            {
+                                CarouselItems.Clear();
+                                foreach (var item in carouselItems)
+                                {
+                                    CarouselItems.Add(item);
+                                }
                             });
                         }
-                    }
+                    });
+                    
+                    // Process offers data
                     if (AdsMoreDetails.OffersGroups != null && AdsMoreDetails.OffersGroups.Count > 0)
                     {
                         reloadOffers = false;
                         AdsMoreDetails.OffersGroups = AdsMoreDetails.OffersGroups.OrderByDescending(og => og.Offers.Max(o => o.CreatedAt)).ToList();
                         foreach (GroupOfOffers off in AdsMoreDetails.OffersGroups)
                         {
-                            OffersGroup.Add(new GroupOffersDetailsExtended(off, UpdateSentOffers));
+                            var groupExtended = new GroupOffersDetailsExtended(off, UpdateSentOffers);
+                            OffersGroup.Add(groupExtended);
+                            
+                            // Ensure offers are visible by default
+                            if (groupExtended.GroupOffers != null && groupExtended.GroupOffers.Count > 0)
+                            {
+                                // Force refresh of visibility properties
+                                foreach (var offer in groupExtended.GroupOffers)
+                                {
+                                    offer.OnPropertyChanged(nameof(offer.AcceptRejectCancelBtnVisibility));
+                                }
+                            }
                         }
+                        
+                        // Ensure offers are visible by default
+                        EnsureOffersVisible();
                     }
+                    
                     if (AdsMoreDetails.SentOffers != null && AdsMoreDetails.SentOffers.Count > 0)
                     {
                         AdsMoreDetails.SentOffers = AdsMoreDetails.SentOffers.OrderBy(o => o.CreatedAt).ToList();
@@ -598,10 +627,6 @@ namespace PassingCar.ViewModels
                             SentOffers.Add(new OfferDetailsExtended(item, UpdateSentOffers));
                         }
                     }
-                    //if (SendOffersBtnsSP != null)
-                    //{
-                    //    SendOffersBtnsSP.IsVisible = IsNotMyAds && NewOfferVisibility;
-                    //}
                 }
                 else
                 {
@@ -622,7 +647,10 @@ namespace PassingCar.ViewModels
                 {
                     foreach (OfferDetailsExtended item in hiddenSentOffers)
                     {
-                        SentOffers.Add(item);
+                        if (item != null)
+                        {
+                            SentOffers.Add(item);
+                        }
                     }
                     hiddenSentOffers = null;
                 }
@@ -631,26 +659,61 @@ namespace PassingCar.ViewModels
                     hiddenSentOffers = new ObservableCollection<OfferDetailsExtended>();
                     foreach (OfferDetailsExtended item in SentOffers)
                     {
-                        hiddenSentOffers.Add(item);
+                        if (item != null)
+                        {
+                            hiddenSentOffers.Add(item);
+                        }
                     }
                     SentOffers.Clear();
                 }
                 if (hiddenOffersGroup != null)
                 {
+                    // Show offers (from hidden to visible)
                     foreach (GroupOffersDetailsExtended item in hiddenOffersGroup)
                     {
-                        OffersGroup.Add(item);
+                        if (item != null)
+                        {
+                            OffersGroup.Add(item);
+                        }
                     }
                     hiddenOffersGroup = null;
                 }
                 else
                 {
+                    // Hide offers (from visible to hidden)
                     hiddenOffersGroup = new ObservableCollection<GroupOffersDetailsExtended>();
                     foreach (GroupOffersDetailsExtended item in OffersGroup)
                     {
-                        hiddenOffersGroup.Add(item);
+                        if (item != null)
+                        {
+                            hiddenOffersGroup.Add(item);
+                        }
                     }
                     OffersGroup.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                _ = ex.Handle();
+            }
+        }
+        
+        // New method to ensure offers are always visible by default
+        public void EnsureOffersVisible()
+        {
+            try
+            {
+                if (hiddenOffersGroup != null && hiddenOffersGroup.Count > 0)
+                {
+                    // Move offers from hidden to visible
+                    foreach (GroupOffersDetailsExtended item in hiddenOffersGroup)
+                    {
+                        if (item != null)
+                        {
+                            OffersGroup.Add(item);
+                        }
+                    }
+                    hiddenOffersGroup = null;
                 }
             }
             catch (Exception ex)
