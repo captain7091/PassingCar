@@ -51,7 +51,6 @@ namespace PassingCar.Views
         
         private async void OnUserInitialized(PassingCar.Models.User user)
         {
-            System.Diagnostics.Debug.WriteLine($"[MyAdsPage] User initialized event received: ID={user.Id}, Name='{user.Name}'");
             
             // Ensure we're on the main thread and this page is visible
             Device.BeginInvokeOnMainThread(async () =>
@@ -62,13 +61,12 @@ namespace PassingCar.Views
                     if (Application.Current.MainPage is MainMenu && 
                         Shell.Current?.CurrentPage == this)
                     {
-                        System.Diagnostics.Debug.WriteLine("[MyAdsPage] Page is visible, refreshing ads after user initialization");
                         await ForceRefreshAds();
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Error in OnUserInitialized: {ex.Message}");
+                    _ = ex.Handle();
                 }
             });
         }
@@ -124,7 +122,7 @@ namespace PassingCar.Views
             {
                 // Handle exceptions with proper error handling
                 _ = ex.Handle();
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Error in collection view scrolling: {ex.Message}");
+                _ = ex.Handle();
             }
         }
         private async void TapGestureRecognizer_Tapped(object sender, TappedEventArgs e)
@@ -173,14 +171,13 @@ namespace PassingCar.Views
             catch (Exception ex)
             {
                 _ = ex.Handle();
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Error in TapGestureRecognizer_Tapped: {ex.Message}");
+                _ = ex.Handle();
             }
         }
         protected override async void OnAppearing()
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("[MyAdsPage] OnAppearing started");
 
                 // CRITICAL FIX: Wait for user initialization if needed
                 await EnsureUserIsInitialized();
@@ -188,7 +185,6 @@ namespace PassingCar.Views
                 // Verify we have a valid user after initialization
                 if (App.CurrentUser == null || App.CurrentUser.Id <= 0)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] ERROR: Still no valid current user after initialization!");
                     Device.BeginInvokeOnMainThread(() =>
                     {
                         DisplayAlert("Login Required", "Please log in again to view your ads.", "OK");
@@ -196,7 +192,6 @@ namespace PassingCar.Views
                     return;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Current User: ID={App.CurrentUser.Id}, Name='{App.CurrentUser.Name}'");
 
                 // NEW: Use GetMyAds API directly instead of local database approach
                 SmallLoading.IsVisible = true;
@@ -206,12 +201,11 @@ namespace PassingCar.Views
                 await LoadMyAdsFromAPI();
 
                 base.OnAppearing();
-                System.Diagnostics.Debug.WriteLine("[MyAdsPage] OnAppearing completed");
             }
             catch (Exception ex)
             {
                 _ = ex.Handle();
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] OnAppearing error: {ex.Message}");
+                _ = ex.Handle();
             }
         }
 
@@ -222,14 +216,12 @@ namespace PassingCar.Views
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("[MyAdsPage] LoadMyAdsFromAPI started");
 
                 // Call the new GetMyAds API
                 GetNextAdsResponse response = await Api.GetMyAds();
                 
                 if (response != null && response.Success && response.AdsItem != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] GetMyAds API returned {response.AdsItem.Count()} ads");
                     
                     // Clear existing ads
                     AdsLibrary.Adss.Clear();
@@ -257,15 +249,32 @@ namespace PassingCar.Views
                             ModifiedAt = item.ModifiedAt,
                         };
                         
-                        AdsLibrary.Adss.Add(adDetails);
+                        // Always add to AllAds for filtering purposes
                         AdsLibrary.AllAds.Add(adDetails);
+                        
+                        // FIXED: Only add to Adss if state < 3 (for Publicados tab by default)
+                        try
+                        {
+                            var stateValue = adDetails.State.ReplaceEspana();
+                            var adsState = (AdsState)Enum.Parse(typeof(AdsState), stateValue);
+                            var stateInt = (int)adsState;
+                            
+                            if (stateInt < 3) // Only show ads with state < 3 in Publicados tab by default
+                            {
+                                AdsLibrary.Adss.Add(adDetails);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _ = ex.Handle();
+                            // If parsing fails, add to Adss to be safe
+                            AdsLibrary.Adss.Add(adDetails);
+                        }
                     }
                     
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Successfully loaded {AdsLibrary.Adss.Count} ads into UI");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] GetMyAds API failed: Success={response?.Success}, Error='{response?.ErrorMessage}'");
                     // Show error message to user if needed
                     if (!string.IsNullOrEmpty(response?.ErrorMessage))
                     {
@@ -280,7 +289,7 @@ namespace PassingCar.Views
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] LoadMyAdsFromAPI error: {ex.Message}");
+                _ = ex.Handle();
                 SmallLoading.IsVisible = false;
                 _ = ex.Handle();
             }
@@ -293,16 +302,13 @@ namespace PassingCar.Views
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("[MyAdsPage] EnsureUserIsInitialized started");
                 
                 // If App.CurrentUser is already set, we're good
                 if (App.CurrentUser != null && App.CurrentUser.Id > 0)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] App.CurrentUser already initialized: ID={App.CurrentUser.Id}");
                     return;
                 }
                 
-                System.Diagnostics.Debug.WriteLine("[MyAdsPage] App.CurrentUser is null, attempting to initialize...");
                 
                 // Wait a bit for background login to complete
                 for (int i = 0; i < 10; i++) // Wait up to 5 seconds
@@ -310,7 +316,6 @@ namespace PassingCar.Views
                     await Task.Delay(500);
                     if (App.CurrentUser != null && App.CurrentUser.Id > 0)
                     {
-                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] App.CurrentUser initialized after {(i + 1) * 500}ms: ID={App.CurrentUser.Id}");
                         return;
                     }
                 }
@@ -318,23 +323,21 @@ namespace PassingCar.Views
                 // If still null, try to get user from API as fallback
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine("[MyAdsPage] Attempting to get user from API as fallback...");
                     int userId = await Api.GetUserId();
                     if (userId > 0)
                     {
                         // Create a minimal user object for now
                         App.CurrentUser = new User { Id = userId, Name = "Current User" };
-                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Created fallback App.CurrentUser: ID={userId}");
                     }
                 }
                 catch (Exception apiEx)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Failed to get user from API: {apiEx.Message}");
+                    _ = apiEx.Handle();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Error in EnsureUserIsInitialized: {ex.Message}");
+                _ = ex.Handle();
             }
         }
 
@@ -342,30 +345,25 @@ namespace PassingCar.Views
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine("[MyAdsPage] ForceRefreshAds started");
 
                 // Check if we have existing ads in database before clearing UI
                 var existingAds = await App.LocalDatabase.GetAllLocalAds();
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Found {existingAds.Count} existing ads in database before API call");
 
                 // Load fresh ads from API (but don't clear UI collections yet)
                 // Progressive timeout strategy: Try multiple approaches
                 bool loaded = false;
 
                 // Approach 1: Try with minimal filter (fastest)
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Attempt 1: Minimal filter for own ads");
                 var minimalFilter = new AdsFilter()
                 {
                     OnlyOwnAds = true,
                     Active = true
                 };
                 loaded = await App.LocalDatabase.GetNewAds(int.MinValue, minimalFilter);
-                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Minimal filter result: {loaded}");
 
                 if (!loaded)
                 {
                     // Approach 2: Try with extended timeout and more specific filter
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Attempt 2: Extended filter with date range");
                     var extendedFilter = new AdsFilter()
                     {
                         OnlyOwnAds = true,
@@ -375,13 +373,11 @@ namespace PassingCar.Views
                         OnlyNextOne = false
                     };
                     loaded = await App.LocalDatabase.GetNewAds(int.MinValue, extendedFilter);
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Extended filter result: {loaded}");
                 }
 
                 if (!loaded)
                 {
                     // Approach 3: Try without date filter (get all user ads)
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Attempt 3: All user ads (no date filter)");
                     var allUserAdsFilter = new AdsFilter()
                     {
                         OnlyOwnAds = true,
@@ -389,13 +385,11 @@ namespace PassingCar.Views
                         Active = true
                     };
                     loaded = await App.LocalDatabase.GetNewAds(int.MinValue, allUserAdsFilter);
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] All user ads result: {loaded}");
                 }
 
                 if (!loaded)
                 {
                     // Attempt 4: Show ALL ads as fallback (better than showing nothing)
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Attempt 4: Fallback to ALL ads (network issues)");
                     var allAdsFilter = new AdsFilter()
                     {
                         OnlyOwnAds = false, // Show all ads
@@ -403,11 +397,9 @@ namespace PassingCar.Views
                         Active = true
                     };
                     loaded = await App.LocalDatabase.GetNewAds(int.MinValue, allAdsFilter);
-                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] All ads fallback result: {loaded}");
 
                     if (loaded)
                     {
-                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] SUCCESS: Showing all ads as fallback due to network issues");
                         // Show a message to user that we're showing all ads due to network issues
                         Device.BeginInvokeOnMainThread(() =>
                         {
@@ -665,6 +657,44 @@ namespace PassingCar.Views
                     Active = true
                 });
 
+                // FIXED: Filter out ads with state >= 3 (payment completed) from Publicados tab
+                // DEBUG: Add debugger statements to check ad states
+                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Publicados tab - Total ads before filtering: {bind.Adss.Count}");
+                foreach (var ad in bind.Adss)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Ad ID: {ad.AdsId}, Title: {ad.AdsTitle}, State: {ad.State}");
+                }
+                
+                var filteredAds = bind.Adss.Where(ad => 
+                {
+                    // Parse the state to check if it's >= 3
+                    try
+                    {
+                        var stateValue = ad.State.ReplaceEspana();
+                        var adsState = (AdsState)Enum.Parse(typeof(AdsState), stateValue);
+                        var stateInt = (int)adsState;
+                        var shouldShow = stateInt < 3; // Only show ads with state < 3
+                        
+                        // DEBUG: Log each ad's filtering decision
+                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Ad {ad.AdsId}: State='{ad.State}' -> Parsed='{stateValue}' -> StateInt={stateInt} -> ShouldShow={shouldShow}");
+                        
+                        return shouldShow;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Error parsing state for ad {ad.AdsId}: {ex.Message}");
+                        return true; // If parsing fails, show the ad
+                    }
+                }).ToList();
+
+                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] Publicados tab - Ads after filtering: {filteredAds.Count}");
+                
+                bind.Adss.Clear();
+                foreach (var ad in filteredAds)
+                {
+                    bind.Adss.Add(ad);
+                }
+
                 SmallLoading.IsVisible = false;
                 AdsLibrary.KeepLoading = false;
             }
@@ -690,22 +720,49 @@ namespace PassingCar.Views
             var bind = BindingContext as ListAdsViewModel;
             
             bind.Adss.Clear();
-            await AdsLibrary.CustomLoad(new AdsFilter()
-            {
-                OnlyOwnAds = true,
-                OnlyFavorites = false,
-                Active = false,
-                ShowAllUsers = false // Ensure only current user's ads are shown
-            });
-
+            
+            // FIXED: Load data from API instead of local database for En Ruta tab
+            System.Diagnostics.Debug.WriteLine("[MyAdsPage] En Ruta tab - Loading data from API");
+            await LoadMyAdsFromAPI();
+            
             var alladds = bind.AllAds;
 
+            // DEBUG: Add debugger statements to check ad states in En Ruta tab
+            System.Diagnostics.Debug.WriteLine($"[MyAdsPage] En Ruta tab - Total ads before filtering: {alladds.Count}");
+            foreach (var ad in alladds)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MyAdsPage] En Ruta - Ad ID: {ad.AdsId}, Title: {ad.AdsTitle}, State: {ad.State}, UserName: {ad.UserName}");
+            }
 
+            // FIXED: Show ads with state >= 3 (payment completed) in En Ruta tab
             var username = await Api.GetUserData();
-            var s = alladds.Where(x => x.State == "En tránsito" && x.UserName == username.Name).ToList();
+            System.Diagnostics.Debug.WriteLine($"[MyAdsPage] En Ruta tab - Current username: {username.Name}");
+            
+            var s = alladds.Where(x => 
+            {
+                try
+                {
+                    var stateValue = x.State.ReplaceEspana();
+                    var adsState = (AdsState)Enum.Parse(typeof(AdsState), stateValue);
+                    var stateInt = (int)adsState;
+                    var isCurrentUser = x.UserName == username.Name;
+                    var shouldShow = stateInt >= 3 && isCurrentUser; // Show ads with state >= 3
+                    
+                    // DEBUG: Log each ad's filtering decision
+                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] En Ruta - Ad {x.AdsId}: State='{x.State}' -> Parsed='{stateValue}' -> StateInt={stateInt} -> IsCurrentUser={isCurrentUser} -> ShouldShow={shouldShow}");
+                    
+                    return shouldShow;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MyAdsPage] En Ruta - Error parsing state for ad {x.AdsId}: {ex.Message}");
+                    return false; // If parsing fails, don't show the ad
+                }
+            }).ToList();
+
+            System.Diagnostics.Debug.WriteLine($"[MyAdsPage] En Ruta tab - Ads after filtering: {s.Count}");
 
             bind.Adss.Clear();
-
 
             foreach (var item in s)
             {
@@ -727,21 +784,29 @@ namespace PassingCar.Views
             var bind = BindingContext as ListAdsViewModel;
             bind.Adss.Clear();
 
-            await AdsLibrary.CustomLoad(new AdsFilter()
-            {
-                OnlyOwnAds = true,
-                OnlyFavorites = false,
-                Active = false,
-                ShowAllUsers = false // Ensure only current user's ads are shown
-            });
+            // FIXED: Load data from API instead of local database for Enviados tab
+            System.Diagnostics.Debug.WriteLine("[MyAdsPage] Enviados tab - Loading data from API");
+            await LoadMyAdsFromAPI();
 
 
 
             var alladds = bind.AllAds;
 
-
+            // FIXED: Show only delivered ads (state = 5) in Enviados tab
             var username = await Api.GetUserData();
-            var s = alladds.Where(x => x.State == "Entregado" && x.UserName == username.Name).ToList();
+            var s = alladds.Where(x => 
+            {
+                try
+                {
+                    var stateValue = x.State.ReplaceEspana();
+                    var adsState = (AdsState)Enum.Parse(typeof(AdsState), stateValue);
+                    return (int)adsState == 5 && x.UserName == username.Name; // Show only delivered ads (state = 5)
+                }
+                catch
+                {
+                    return false; // If parsing fails, don't show the ad
+                }
+            }).ToList();
 
             bind.Adss.Clear();
 

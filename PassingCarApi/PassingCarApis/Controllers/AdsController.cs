@@ -16,6 +16,9 @@ using PassingCarApis.Models.API.Payment;
 using PassingCarApis.Models.API.User;
 using PassingCarApis.Services;
 using Stripe;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Twilio.Http;
 using Review = PassingCarApis.Models.Review;
 
 namespace PassingCarApis.Controllers
@@ -1121,6 +1124,7 @@ namespace PassingCarApis.Controllers
                 string moreFilter = filterBuilder.ToString();
                 
                 // Optimized query with better performance
+                // FIXED: Always exclude ads with state >= 3 (AcceptedForTransit and above) - these are ads where payment has been completed
                 string query = $@"SELECT TOP 50
                                     COALESCE(a.Photo1, a.Photo2, a.Photo3, a.Photo4) AS FirstAdsImage,
                                     a.Title as AdsTitle,
@@ -1143,7 +1147,7 @@ namespace PassingCarApis.Controllers
                                            WHERE ReviewedUserId = u.Id AND ReviewedUserProfile = @UserProfile), -1) as UserRating
                                 FROM Ads a WITH (NOLOCK)
                                 LEFT JOIN [User] u WITH (NOLOCK) ON a.UserId = u.ID
-                                WHERE a.Id > @LastLoadedAds {moreFilter}
+                                WHERE a.Id > @LastLoadedAds AND a.State < 3 {moreFilter}
                                 {GetOrderByClause(input.Filter?.Relevance)}";
                 
                 var parameters = new { 
@@ -1265,6 +1269,7 @@ namespace PassingCarApis.Controllers
             try
             {
         // Lightweight query to get all users' ads (similar to GetMyAds but for all users)
+        // FIXED: Always exclude ads with state >= 3 (AcceptedForTransit and above) - these are ads where payment has been completed
         string query = @"SELECT TOP 50
                                     COALESCE(a.Photo1, a.Photo2, a.Photo3, a.Photo4) AS FirstAdsImage,
                                     a.Title as AdsTitle,
@@ -1283,6 +1288,7 @@ namespace PassingCarApis.Controllers
                                     -1 as UserRating
                                 FROM Ads a WITH (NOLOCK)
                                 LEFT JOIN [User] u WITH (NOLOCK) ON a.UserId = u.ID
+                                WHERE a.State < 3
                                 ORDER BY a.CreatedAt DESC";
 
         var parameters = new { 
@@ -1362,7 +1368,7 @@ namespace PassingCarApis.Controllers
 
                 var parameters = new { 
                     UserId = loggedUser.Id,
-                    UserProfile = loggedUser.Profile
+                    UserProfile = (int)loggedUser.Profile  // Convert enum to int for database comparison
                 };
                 
                 var adsItems = (await connection.QueryAsync<AdFromAdsListModel>(query, parameters)).ToList();
@@ -1382,6 +1388,80 @@ namespace PassingCarApis.Controllers
             {
                 ex.CatchIt();
                 System.Diagnostics.Debug.WriteLine($"[API] GetMyOffersAds ERROR: {ex.Message}");
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                return response;
+            }
+            finally
+            {
+                await connection.CloseAsync();
+            }
+        }
+
+        [HttpGet(Name = "GetMyCompletedOffersAds")]
+        public async Task<GetNextAdsResponse> GetMyCompletedOffersAds()
+        {
+            GetNextAdsResponse response = new();
+            UserIdAndProfile loggedUser = await GetUserIdAndProfileAsync();
+            System.Diagnostics.Debug.WriteLine($"[API] GetMyCompletedOffersAds called by user {loggedUser.Id}");
+            
+            if (loggedUser.Id <= 0)
+            {
+                response.Success = false;
+                response.ErrorMessage = "You must be logged in!";
+                return response;
+            }
+
+            using SqlConnection connection = AppConfiguration.GetConnection();
+            await connection.OpenAsync();
+            try
+            {
+                // Query to get ads where driver has made offers and payment is completed (state >= 3)
+                string query = @"SELECT TOP 50
+                                    COALESCE(a.Photo1, a.Photo2, a.Photo3, a.Photo4) AS FirstAdsImage,
+                                    a.Title as AdsTitle,
+                                    0 as IsFavorite,
+                                    a.Id as AdsId,
+                                    a.State as State,
+                                    a.[From] as AdsFrom,
+                                    a.[To] as AdsTo,
+                                    a.Price as AdsPrice,
+                                    u.Photo as UserProfilePhoto,
+                                    a.UserProfile,
+                                    CASE WHEN (a.UserProfile IS NULL OR a.UserProfile = '0' OR a.UserProfile = 'Fisica') 
+                                         THEN u.Name
+                                         ELSE ISNULL(JSON_VALUE(u.JuridicDetails, '$.CompanyName'), '') END as UserName,
+                                    u.Id as UserId,
+                                    a.CreatedAt as PostedTime,
+                                    a.ModifiedAt,
+                                    -1 as UserRating
+                                FROM Ads a WITH (NOLOCK)
+                                INNER JOIN Offer o WITH (NOLOCK) ON a.Id = o.AdId
+                                LEFT JOIN [User] u WITH (NOLOCK) ON a.UserId = u.ID
+                                WHERE o.UserId = @UserId 
+                                  AND o.State >= 3  -- PaymentPending, Accepted, Rejected, Canceled (payment completed)
+                                ORDER BY o.CreatedAt DESC";
+
+                var parameters = new { 
+                    UserId = loggedUser.Id,
+                    //UserProfile = (int)loggedUser.Profile  // Convert enum to int for database comparison
+                };
+                
+                var adsItems = (await connection.QueryAsync<AdFromAdsListModel>(query, parameters)).ToList();
+
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyCompletedOffersAds query returned {adsItems.Count} items for user {loggedUser.Id}");
+
+                response = new GetNextAdsResponse()
+                {
+                    Success = true,
+                    ErrorMessage = string.Empty,
+                    AdsItem = adsItems
+                };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                ex.CatchIt();
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
                 return response;
@@ -1445,7 +1525,7 @@ namespace PassingCarApis.Controllers
                                     from Ads a
                                     left Join [User] u
                                     on a.UserId = u.ID
-                                    where a.Id = @AdsId ";
+                                    where a.Id = @AdsId AND a.State < 3 ";
                                 AdFromAdsListModel updatedAds = await connection.QueryFirstOrDefaultAsync<AdFromAdsListModel>(query, new { AdsId = item.AdId });
                                 AdsItems.Add(updatedAds);
                             }
@@ -1497,7 +1577,7 @@ namespace PassingCarApis.Controllers
                 try
                 {
                     string query = $@"Select Top 50 s.Id, s.CreatedAt, s.State, a.[From], a.[To], o.Id as OfferId, a.Id as AdsId, s.ConfirmationCode, s.History,
-                                    CASE WHEN (a.UserId = @UserId AND a.UserProfile =  @UserProfile) THEN 1
+                                    CASE WHEN (a.UserId = @UserId) THEN 1
 									ELSE 0
 									END  as IsMyAds
                                     from Shipping s
@@ -1506,9 +1586,9 @@ namespace PassingCarApis.Controllers
                                     inner Join Ads a
                                     on a.Id = o.AdId
                                     where s.Id > @LastShippingLoaded
-                                    and ((a.UserId = @UserId  AND a.UserProfile = @UserProfile) or (o.UserId = @UserId  AND o.UserProfile = @UserProfile))
+                                    and ((a.UserId = @UserId) or (o.UserId = @UserId))
                                     order by s.Id desc ";
-                    IEnumerable<ShippingFromDBModel> ship = await connection.QueryAsync<ShippingFromDBModel>(query, new { UserId = loggedUser.Id, UserProfile = loggedUser.Profile.ToString(), input.LastShippingLoaded }); ;
+                    IEnumerable<ShippingFromDBModel> ship = await connection.QueryAsync<ShippingFromDBModel>(query, new { UserId = loggedUser.Id, input.LastShippingLoaded }); ;
                     response = new GetNextShippingResponse()
                     {
                         Success = true,
@@ -1839,10 +1919,10 @@ namespace PassingCarApis.Controllers
                                     NULL AS FirstPhoto,
 									a.Title, a.CreatedAt from Ads a
 									Where Id in (Select AdId from Offer)
-									AND UserId = @UserId AND UserProfile =  @UserProfile ";
+									AND UserId = @UserId";
 
 
-                    IEnumerable<AdsParent> adsWithOffers = await connection.QueryAsync<AdsParent>(query, new { UserProfile = loggedUser.Profile, UserId = loggedUser.Id });
+                    IEnumerable<AdsParent> adsWithOffers = await connection.QueryAsync<AdsParent>(query, new {UserId = loggedUser.Id });
                     if (adsWithOffers != null && adsWithOffers.Count() > 0)
                     {
                         foreach (AdsParent ad in adsWithOffers)
@@ -1863,7 +1943,7 @@ namespace PassingCarApis.Controllers
 									inner join  Offer o
 									on o.UserId = u.Id
 									left join Chat c
-									on c.UberUserId = u.Id and c.UberUserProfile = o.UserProfile  and c.AdId = @AdsId
+									on c.UberUserId = u.Id and c.AdId = @AdsId
 									where o.AdId = @AdsId";
 
                                 ad.OffersGroups = (await connection.QueryAsync<GroupOfOffers>(query, new { ad.AdsId })).ToList();
@@ -1877,8 +1957,7 @@ namespace PassingCarApis.Controllers
                                             left
                                             join [User] u
                                             on o.UserId = u.Id
-                                            where AdId = @AdsId AND u.Id = @UserId ";
-                   var prof= ((int)group.UserProfile);
+                                            where AdId = @AdsId AND u.Id = @UserId";
                                         ad.OffersGroups[indexOfGroup].Offers = (await connection.QueryAsync<OfferDetails>(query, new { ad.AdsId, group.UserId })).ToList();
                                         if (ad.OffersGroups[indexOfGroup].Offers != null && ad.OffersGroups[indexOfGroup].Offers.Count > 0)
                                         {

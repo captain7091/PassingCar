@@ -5,11 +5,22 @@ using Microsoft.OpenApi.Models;
 using PassingCarApis.Hubs;
 using PassingCarApis.Services;
 using PassingCarApis.SQL;
+using PassingCarApis.Utils;
 using Rotativa.AspNetCore;
 using System.Data;
 using System.Text;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// Configure TokenSettings
+builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
+var tokenSettings = builder.Configuration.GetSection("TokenSettings").Get<TokenSettings>();
+
+// Validate TokenSettings
+if (tokenSettings == null || string.IsNullOrEmpty(tokenSettings.SecretKey))
+{
+    throw new InvalidOperationException("TokenSettings or SecretKey is not configured properly in appsettings.json");
+}
 
 // Add services to the container.
 
@@ -34,6 +45,7 @@ builder.Services.AddResponseCaching();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IHubService, HubService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddHostedService<RemoveOldAdsService>();
 builder.Services.AddControllersWithViews();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -66,21 +78,27 @@ builder.Services.AddSwaggerGen(c =>
 });
 //builder.Services.AddSignalRCore();
 //builder.Services.AddScoped<AdsContextHub>();
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
-    })
-    ;
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        RequireExpirationTime = true,
+        ValidIssuer = tokenSettings.Issuer,
+        ValidAudience = tokenSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSettings.SecretKey)),
+        ClockSkew = TimeSpan.FromSeconds(0)
+    };
+});
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.

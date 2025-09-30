@@ -1,5 +1,6 @@
 using PassingCar.Extensions;
 using PassingCar.IntegrationsWithApi;
+using PassingCar.Models;
 using PassingCar.Models.API.Ads;
 using PassingCar.Utils;
 using PassingCar.ViewModels;
@@ -234,6 +235,19 @@ namespace PassingCar.Views
                             UserId = item.UserId,
                             ModifiedAt = item.ModifiedAt,
                         };
+                        
+                        // DEBUG: Log each ad's state for Anuncios screen
+                        try
+                        {
+                            var stateValue = adsDetails.State.ReplaceEspana();
+                            var adsState = (AdsState)Enum.Parse(typeof(AdsState), stateValue);
+                            var stateInt = (int)adsState;
+                            System.Diagnostics.Debug.WriteLine($"[AdsPage] Anuncios - Ad {adsDetails.AdsId}: State='{adsDetails.State}' -> Parsed='{stateValue}' -> StateInt={stateInt}");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[AdsPage] Anuncios - Error parsing state for ad {adsDetails.AdsId}: {ex.Message}");
+                        }
                         
                         AdsLibrary.Adss.Add(adsDetails);
                         AdsLibrary.AllAds.Add(adsDetails);

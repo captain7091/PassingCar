@@ -25,7 +25,7 @@ namespace PassingCar.ViewModels
                 {
                     //handle exception
                     _onlyActive = value;
-                    UpdateShippings();
+                    //UpdateShippings();
                     OnPropertyChanged(nameof(OnlyActive));
                     OnPropertyChanged(nameof(Shippingss));
                 }

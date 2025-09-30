@@ -112,9 +112,10 @@ namespace PassingCar.LocalDatabase
             try
             {
                 List<LocalAd> allads = await _localDB.Table<LocalAd>().ToListAsync();
-                List<LocalAd> ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.PaymentPending).ToListAsync();
+                // FIXED: Filter out ads with state >= 3 (AcceptedForTransit and above) - these are ads where payment has been completed
+                List<LocalAd> ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.AcceptedForTransit).ToListAsync();
 
-                System.Diagnostics.Debug.WriteLine($"[LocalDB] GetAdsForCheck: Found {allads.Count} total ads, {ads.Count} active ads");
+                System.Diagnostics.Debug.WriteLine($"[LocalDB] GetAdsForCheck: Found {allads.Count} total ads, {ads.Count} active ads (excluding paid ads)");
 
                 // CRITICAL FIX: Always try to load new ads from API, especially if database is empty
                 bool loadedNewAds = await GetNewAds(GetMaxId(allads), adsFilter);
@@ -122,15 +123,15 @@ namespace PassingCar.LocalDatabase
                 
                 if (loadedNewAds)
                 {
-                    // Refresh ads from database after API call
-                    ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.PaymentPending).ToListAsync();
-                    System.Diagnostics.Debug.WriteLine($"[LocalDB] After API call: {ads.Count} active ads in database");
+                    // Refresh ads from database after API call - still filter out paid ads
+                    ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.AcceptedForTransit).ToListAsync();
+                    System.Diagnostics.Debug.WriteLine($"[LocalDB] After API call: {ads.Count} active ads in database (excluding paid ads)");
                 }
 
                 // CRITICAL FIX: Always filter out test ads now that we've removed test ad creation
                 // Real ads should be loaded from the API
                 ads = FilterOutTestAds(ads);
-                System.Diagnostics.Debug.WriteLine($"[LocalDB] After filtering test ads: {ads.Count} real ads remain");
+                System.Diagnostics.Debug.WriteLine($"[LocalDB] After filtering test ads: {ads.Count} real ads remain (excluding paid ads)");
 
                 return await GetFiltered(ads, adsFilter);
             }
@@ -169,11 +170,12 @@ namespace PassingCar.LocalDatabase
                 else
                 {
                     List<LocalAd> allads = await _localDB.Table<LocalAd>().ToListAsync();
-                    List<LocalAd> ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.PaymentPending).ToListAsync();
+                    // FIXED: Filter out ads with state >= 3 (AcceptedForTransit and above) - these are ads where payment has been completed
+                    List<LocalAd> ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.AcceptedForTransit).ToListAsync();
                     bool loadedNewAds = await GetNewAds(GetMaxId(allads));
                     if (loadedNewAds)
                     {
-                        ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.PaymentPending).ToListAsync();
+                        ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.AcceptedForTransit).ToListAsync();
                     }
                     return ads.Where(a => a.Id == adsID).FirstOrDefault();
                 }

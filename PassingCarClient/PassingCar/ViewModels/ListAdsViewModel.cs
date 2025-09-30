@@ -56,7 +56,8 @@ namespace PassingCar.ViewModels
                     }
                     else
                     {
-                        if (item.State > Models.AdsState.Posted)
+                        // FIXED: Remove ads with state >= 3 (AcceptedForTransit and above) from Anuncios screen - these are ads where payment has been completed
+                        if (item.State >= Models.AdsState.AcceptedForTransit)
                         {
                             if (thisAdss != null && thisAdss.Count() > 0)
                             {
@@ -169,15 +170,16 @@ namespace PassingCar.ViewModels
                         AllAds.Add(adDetails);
 
                         // Only add to Adss if it meets the display criteria
+                        // FIXED: Exclude ads with state >= 3 (AcceptedForTransit and above) from Anuncios screen - these are ads where payment has been completed
                         IEnumerable<AdsDetailsExtened> where = Adss.Where(a => a.AdsId == item.Id);
                         if (where != null && where.Any())
                         {
-                            if (item.State >= Models.AdsState.PaymentPending)
+                            if (item.State >= Models.AdsState.AcceptedForTransit)
                             {
                                 _ = Adss.Remove(where.First());
                             }
                         }
-                        else if (item.State < Models.AdsState.PaymentPending)
+                        else if (item.State < Models.AdsState.AcceptedForTransit)
                         {
                             Adss.Insert(0, adDetails);
                         }

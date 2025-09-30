@@ -2,10 +2,12 @@ using CommunityToolkit.Maui.Extensions;
 using PassingCar.Extensions;
 using PassingCar.Hubs;
 using PassingCar.IntegrationsWithApi;
+using PassingCar.Models;
 using PassingCar.Models.API.Ads;
 using PassingCar.ViewModels;
 using PassingCar.Views.Intitial;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -98,57 +100,70 @@ namespace PassingCar.Views
         {
             try
             {
-                System.Diagnostics.Debug.WriteLine($"[MyShippingPage] LoadMisOfertasTabData called - loading driver's offers");
+                System.Diagnostics.Debug.WriteLine($"[MyShippingPage] LoadMisOfertasTabData called - loading offers for sender");
                 
-                // Call the new GetMyOffersAds API (for drivers to see ads where they made offers)
-                GetNextAdsResponse response = await Api.GetMyOffersAds();
+                // Call GetMyOffers API (for senders to see offers on their ads)
+                GetOffersResponse response = await Api.GetMyOffers();
                 
-                if (response != null && response.Success && response.AdsItem != null)
+                if (response != null && response.Success && response.Ads != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffersAds API returned {response.AdsItem.Count()} ads for Mis Ofertas tab");
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffers API returned {response.Ads.Count()} ads with offers for Mis Ofertas tab");
                     
-                    // Create a temporary loading control for ads display
+                    // Create a temporary loading control for offers display
                     var tempLoading = new LoadingSmall();
                     
-                    // Create a new ListAdsViewModel for ads display
-                    var adsViewModel = new ListAdsViewModel(tempLoading);
+                    // Create a new ListOffersViewModel for offers display
+                    var offersViewModel = new ListOffersViewModel();
                     
-                    // Clear existing ads
-                    adsViewModel.Adss.Clear();
-                    adsViewModel.AllAds.Clear();
+                    // Clear existing offers
+                    offersViewModel.Ads.Clear();
                     
-                    // Convert API response to local ads and populate the UI
-                    foreach (var item in response.AdsItem)
+                    // Convert API response to local offers and populate the UI
+                    foreach (var item in response.Ads)
                     {
-                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Processing ad: {item.AdsTitle}, AdsId: {item.AdsId}, UserProfile: {item.UserProfile}");
+                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Processing ad with offers: {item.Title}, AdsId: {item.AdsId}");
                         
-                        var adDetails = new AdsDetailsExtened(false)
+                        var adsParentExtended = new AdsParentExtended()
                         {
-                            FirstAdsImage = item.FirstAdsImage,
-                            AdsTitle = item.AdsTitle,
-                            IsFavorite = item.IsFavorite,
                             AdsId = item.AdsId,
-                            AdsFrom = item.AdsFrom,
-                            AdsTo = item.AdsTo,
-                            AdsPrice = item.AdsPrice,
-                            State = item.State.Espana(),
-                            UserProfilePhoto = item.UserProfilePhoto,
-                            UserProfile = item.UserProfile,
-                            UserName = item.UserName,
-                            UserRating = item.UserRating,
-                            PostedTime = item.PostedTime,
-                            UserId = item.UserId,
-                            ModifiedAt = item.ModifiedAt,
+                            CreatedAt = item.CreatedAt,
+                            ChatIdForViewer = item.ChatIdForViewer,
+                            FirstPhoto = item.FirstPhoto,
+                            OffersGroupEx = new ObservableCollection<GroupOffersDetailsExtended>(),
+                            SentOffersEx = new ObservableCollection<OfferDetailsExtended>(),
+                            Title = item.Title
                         };
                         
-                        adsViewModel.Adss.Add(adDetails);
-                        adsViewModel.AllAds.Add(adDetails);
+                        // Load the first photo for the ad
+                        adsParentExtended.FirstPhoto = await adsParentExtended.AdsId.GetAdsPhoto();
                         
-                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Added ad to viewmodel: {adDetails.AdsTitle}, Count: {adsViewModel.Adss.Count}");
+                        // Convert offers groups
+                        if (item.OffersGroups != null && item.OffersGroups.Count > 0)
+                        {
+                            foreach (var group in item.OffersGroups)
+                            {
+                                var groupExtended = new GroupOffersDetailsExtended(group, null);
+                                adsParentExtended.OffersGroupEx.Add(groupExtended);
+                            }
+                        }
+                        
+                        // Convert sent offers
+                        if (item.SentOffers != null && item.SentOffers.Count > 0)
+                        {
+                            foreach (var sentOffer in item.SentOffers)
+                            {
+                                var sentOfferExtended = new OfferDetailsExtended(sentOffer, null);
+                                adsParentExtended.SentOffersEx.Add(sentOfferExtended);
+                            }
+                        }
+                        
+                        offersViewModel.Ads.Add(adsParentExtended);
+                        
+                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Added ad with offers to viewmodel: {adsParentExtended.Title}, Count: {offersViewModel.Ads.Count}");
                     }
                     
-                    // Set the binding context to show ads in collectionview_ads
-                    collectionview_ads.BindingContext = adsViewModel;
+                    // Set the binding context to show offers in collectionview_ads
+                    collectionview_ads.BindingContext = offersViewModel;
                     collectionview_ads.IsVisible = true;
                     
                     // Keep collectionview_shippings visible but empty so tabs remain visible
@@ -156,12 +171,12 @@ namespace PassingCar.Views
                     collectionview_shippings.IsVisible = true;
                     Entregados.IsVisible = false;
                     
-                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Successfully loaded {adsViewModel.Adss.Count} ads into Mis Ofertas tab");
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Successfully loaded {offersViewModel.Ads.Count} ads with offers into Mis Ofertas tab");
                     System.Diagnostics.Debug.WriteLine($"[MyShippingPage] CollectionView_ads Visible: {collectionview_ads.IsVisible}");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffersAds API failed: Success={response?.Success}, Error='{response?.ErrorMessage}'");
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffers API failed: Success={response?.Success}, Error='{response?.ErrorMessage}'");
                     // Show empty state or error message
                     collectionview_ads.IsVisible = true;
                     ShippingsLibrary.Shippingss.Clear();
@@ -171,12 +186,29 @@ namespace PassingCar.Views
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Error loading ads for Mis Ofertas tab: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Error loading offers for Mis Ofertas tab: {ex.Message}");
                 _ = ex.Handle();
                 collectionview_ads.IsVisible = true;
                 ShippingsLibrary.Shippingss.Clear();
                 collectionview_shippings.IsVisible = true;
                 Entregados.IsVisible = false;
+            }
+        }
+
+        private async Task LoadEnRutaTabData()
+        {
+            try
+            {
+                // Load shipping items instead of ads for En Ruta tab
+                await ShippingsLibrary.CustomLoad();
+                
+                // FIXED: Ensure collectionview_shippings is visible (BindingContext already set in constructor)
+                collectionview_shippings.IsVisible = true;
+            }
+            catch (Exception ex)
+            {
+                _ = ex.Handle();
+                collectionview_ads.IsVisible = true;
             }
         }
 
@@ -192,18 +224,22 @@ namespace PassingCar.Views
             Enviados2.BackgroundColorTo(Color.FromHex("#c3c3c3"));
             await En_Ruta2.BackgroundColorTo(Color.FromHex("#fe3f40"));
          
+            // Show shipping items for En Ruta tab (not ads)
             collectionview_shippings.IsVisible = true;
             collectionview_ads.IsVisible = false;
             Entregados.IsVisible = false;
+            
+            // Ensure proper binding context
+            if (collectionview_shippings.BindingContext == null)
+            {
+                collectionview_shippings.BindingContext = ShippingsLibrary;
+            }
 
             // Show loading spinner
             SmallLoading.IsVisible = true;
 
-            // Set OnlyActive to true for En Ruta tab to show only active shipments
-            ShippingsLibrary.OnlyActive = true;
-            
-            // Reload data for En Ruta tab
-            await ShippingsLibrary.CustomLoad();
+            // FIXED: Load driver's offers with payment completed (state >= 3) for En Ruta tab
+            await LoadEnRutaTabData();
             
             // Hide loading spinner after data is loaded
             SmallLoading.IsVisible = false;

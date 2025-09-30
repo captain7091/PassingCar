@@ -12,7 +12,16 @@ namespace PassingCar.Models.API.Ads
     public class ShippingsDetailsExtened : BaseViewModel
     {
         public int Id { get; set; }
-        public DateTime CreatedAt { get; set; }
+        private DateTime _createdAt;
+        public DateTime CreatedAt 
+        { 
+            get => _createdAt; 
+            set 
+            { 
+                _createdAt = value; 
+                OnPropertyChanged(nameof(CreatedAt)); 
+            } 
+        }
         private ShippingState _state = ShippingState.PendingForPickup;
         public ShippingState State
         {
@@ -67,7 +76,16 @@ namespace PassingCar.Models.API.Ads
             }
         }
         public int OfferId { get; set; }
-        public int AdsId { get; set; }
+        private int _adsId;
+        public int AdsId 
+        { 
+            get => _adsId; 
+            set 
+            { 
+                _adsId = value; 
+                OnPropertyChanged(nameof(AdsId)); 
+            } 
+        }
         public string Code1 { get; set; }
         public string Code2 { get; set; }
         public string Code3 { get; set; }
@@ -132,19 +150,38 @@ namespace PassingCar.Models.API.Ads
         public ShippingsDetailsExtened(ObservableCollection<ShippingsDetailsExtened> parent, ShippingFromListModel item)
         {
             this.parent = parent;
-            Id = item.Id;
-            CreatedAt = item.CreatedAt;
-            State = item.State;
-            From = item.From;
-            To = item.To;
-            OfferId = item.OfferId;
-            AdsId = item.AdsId;
-            IsMyAds = item.IsMyAds;
-            ConfirmationCode = item.ConfirmationCode;
-            History = new ObservableCollection<ShippmentHistoryModel>();
-            foreach (ShippmentHistoryModel hist in item.History)
+            
+            // Handle null item for hardcoded testing
+            if (item != null)
             {
-                History.Add(hist);
+                Id = item.Id;
+                CreatedAt = item.CreatedAt;
+                State = item.State;
+                From = item.From;
+                To = item.To;
+                OfferId = item.OfferId;
+                AdsId = item.AdsId;
+            }
+            else
+            {
+                // Default values for hardcoded testing
+                Id = 0;
+                CreatedAt = DateTime.Now;
+                State = ShippingState.PendingForPickup;
+                From = null;
+                To = null;
+                OfferId = 0;
+                AdsId = 0;
+            }
+            IsMyAds = item?.IsMyAds ?? false;
+            ConfirmationCode = item?.ConfirmationCode ?? string.Empty;
+            History = new ObservableCollection<ShippmentHistoryModel>();
+            if (item?.History != null)
+            {
+                foreach (ShippmentHistoryModel hist in item.History)
+                {
+                    History.Add(hist);
+                }
             }
             FromLocationCommand = new Command(FromLocation);
             ToLocationCommand = new Command(ToLocation);

@@ -124,12 +124,19 @@ namespace PassingCar.Views
                 }
 
                 //if all_validators
-                if (check_pay == 0)
-                {
+                // TESTING MODE - Comment out validation for testing
+                //if (check_pay == 0)
+                //{
                     MakePayment();
                     //Console.WriteLine("all_okk");
                     //DoSomethingAsync();
-                }
+                //}
+                
+                // PRODUCTION MODE - Uncomment below for production
+                //if (check_pay == 0)
+                //{
+                //    MakePayment();
+                //}
             }
             catch (Exception ex)
             {

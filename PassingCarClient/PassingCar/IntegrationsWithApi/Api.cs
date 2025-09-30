@@ -1480,6 +1480,54 @@ namespace PassingCar.IntegrationsWithApi
             return response;
         }
 
+        public static async Task<GetNextAdsResponse> GetMyCompletedOffersAds()
+        {
+            GetNextAdsResponse response;
+            AuthorizeClientForWS client = await CreateAuthorizedClientForWS();
+
+            System.Diagnostics.Debug.WriteLine($"[API] GetMyCompletedOffersAds authorization: Success={client.Success}, ErrorMessage='{client.ErrorMessage}'");
+
+            if (client.Success && client.Client != null)
+            {
+                System.Diagnostics.Debug.WriteLine("[API] Creating GetMyCompletedOffersAds request to /Ads/GetMyCompletedOffersAds");
+                RestRequest apiRequest = new RestRequest("/Ads/GetMyCompletedOffersAds", Method.Get);
+
+                // 15s timeout for consistency
+                apiRequest.Timeout = TimeSpan.FromSeconds(15);
+
+                System.Diagnostics.Debug.WriteLine("[API] Executing GetMyCompletedOffersAds request with 15s timeout...");
+                RestResponse apiResponse = await client.Client.ExecuteAsync(apiRequest);
+
+                response = apiResponse != null
+                    ? apiResponse.StatusCode != HttpStatusCode.OK || apiResponse.ResponseStatus != ResponseStatus.Completed
+                        ? new GetNextAdsResponse()
+                        {
+                            Success = false,
+                            ErrorMessage = apiResponse.ResponseStatus == ResponseStatus.TimedOut
+                                ? "Network timeout - please check your internet connection and try again"
+                                : $"API Error: StatusCode {apiResponse.StatusCode}, Status {apiResponse.ResponseStatus}. Content: {apiResponse.Content}"
+                        }
+                        : JsonConvert.DeserializeObject<GetNextAdsResponse>(apiResponse.Content)
+                    : new GetNextAdsResponse()
+                    {
+                        Success = false,
+                        ErrorMessage = $"Network error - no response received from server"
+                    };
+
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyCompletedOffersAds final response: Success={response?.Success}, AdsCount={response?.AdsItem?.Count() ?? 0}, Error='{response?.ErrorMessage}'");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[API] GetMyCompletedOffersAds authorization failed: {client.ErrorMessage}");
+                response = new GetNextAdsResponse()
+                {
+                    Success = false,
+                    ErrorMessage = client.ErrorMessage
+                };
+            }
+            return response;
+        }
+
         public static async Task<GetNextAdsResponse> CheckAdsUpdates(List<LocalAd> localAdsToUpdate)
         {
             CheckAdsUpdatesInput input = new CheckAdsUpdatesInput() { AdsFromLocal = new List<AdsUpdateDetails>() };
