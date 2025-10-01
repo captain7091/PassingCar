@@ -7,12 +7,12 @@
              x:Class="PassingCar.Views.MyShippingPage"
              xmlns:markups="clr-namespace:PassingCar;assembly=PassingCar"
              BackgroundColor="White">
-    <ContentPage.Content>
-        <AbsoluteLayout BackgroundColor="Transparent" x:Name="myshipping_page">
+  <ContentPage.Content>
+    <AbsoluteLayout BackgroundColor="Transparent" x:Name="myshipping_page">
 
 
-            <!-- CollectionView for Mis Ofertas tab (ads) -->
-            <CollectionView
+      <!-- CollectionView for Mis Ofertas tab (ads) -->
+      <CollectionView
                 x:Name="collectionview_ads"
                 Margin="0,155,0,0"
                 AbsoluteLayout.LayoutBounds="0,0,1,1"
@@ -24,39 +24,39 @@
                 RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
                 IsVisible="False">
 
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <ContentView>
+        <CollectionView.ItemTemplate>
+          <DataTemplate>
+            <ContentView>
 
-                                <utils:NeatFrame CornerRadius="15"
+              <utils:NeatFrame CornerRadius="15"
                        BackgroundColor="#f6f5f5"
                        Padding="0"
                        Margin="15, 8, 15, 8">
-                                    <Grid Padding="0" BackgroundColor="Transparent" Margin="10, 8, 10, 8">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition />
-                                            <ColumnDefinition />
-                                            <ColumnDefinition  />
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="25"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <!--<StackLayout BackgroundColor="Transparent" VerticalOptions="Start" HorizontalOptions="Start" Padding="0, 5, 0, 0" Grid.Column="0" Grid.Row="0">
+                <Grid Padding="0" BackgroundColor="Transparent" Margin="10, 8, 10, 8">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition  />
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                  </Grid.RowDefinitions>
+                  <!--<StackLayout BackgroundColor="Transparent" VerticalOptions="Start" HorizontalOptions="Start" Padding="0, 5, 0, 0" Grid.Column="0" Grid.Row="0">
                             <Label VerticalOptions="CenterAndExpand" FontFamily="RajSemiBold" FontSize="12"  TextColor="Red" Text="{Binding Ads.State, StringFormat='State: {0}' }" />
                         </StackLayout>-->
-                                        <StackLayout BackgroundColor="Transparent" VerticalOptions="Start" HorizontalOptions="End" Padding="0, 5, 5, 0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2">
-                                            <Image HeightRequest="12" BackgroundColor="Transparent" Source="{Binding FavoriteImage}" Aspect="AspectFit" >
-                                                <Image.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding AddToFavorite}"></TapGestureRecognizer>
-                                                </Image.GestureRecognizers>
-                                            </Image>
+                  <StackLayout BackgroundColor="Transparent" VerticalOptions="Start" HorizontalOptions="End" Padding="0, 5, 5, 0" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2">
+                    <Image HeightRequest="12" BackgroundColor="Transparent" Source="{Binding FavoriteImage}" Aspect="AspectFit" >
+                      <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AddToFavorite}"></TapGestureRecognizer>
+                      </Image.GestureRecognizers>
+                    </Image>
 
-                                        </StackLayout>
+                  </StackLayout>
 
-                                        <Label  Grid.ColumnSpan="2" 
+                  <Label  Grid.ColumnSpan="2" 
                             Grid.Row="0"
                                     FontFamily="RajRegular"
                                     FontSize="{markups:OnScreenSize DefaultSize='12' , Small='10', Medium='10',  ExtraSmall='10'}"
@@ -67,15 +67,15 @@
                                     TextColor="Black"
                                     Margin="0"                                   
                                     Padding="10, 0, 0, 0"/>
-                                        <StackLayout
+                  <StackLayout
                             Orientation="Vertical"
                             BackgroundColor="Transparent" 
                             VerticalOptions="CenterAndExpand" 
                             HorizontalOptions="CenterAndExpand" 
                             Padding="0" Grid.Column="0" 
                             Grid.Row="1" Grid.RowSpan="3">
-                                            <Image WidthRequest="100" HeightRequest="80" BackgroundColor="Transparent" Source="{Binding FirstImage}" Aspect="AspectFit" />
-                                            <Label 
+                    <Image WidthRequest="100" HeightRequest="80" BackgroundColor="Transparent" Source="{Binding FirstImage}" Aspect="AspectFit" />
+                    <Label 
                                     Padding="0, 5, 0, 0" 
                                     HorizontalOptions="CenterAndExpand" 
                                     VerticalOptions="CenterAndExpand" 
@@ -83,11 +83,11 @@
                                     TextColor="#44394a"
                                     FontFamily="RajSemiBold"
                                     FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}" Text="{Binding AdsPrice, StringFormat='{0:0.00} €'}" />
-                                        </StackLayout>
+                  </StackLayout>
 
-                                        <StackLayout 
+                  <StackLayout 
                                     VerticalOptions="CenterAndExpand"  Padding="10, 5, 10, 0"  Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Grid.RowSpan="2">
-                                            <Label  
+                    <Label  
                                 FontSize="{markups:OnScreenSize DefaultSize='14' , Small='12', Medium='12',  ExtraSmall='10'}"
                                 VerticalOptions="CenterAndExpand"
                                 HorizontalOptions="CenterAndExpand"
@@ -96,38 +96,38 @@
                                 TextColor="#44394a"
                                 HorizontalTextAlignment="Center"
                                 Text="{Binding AdsTitle, StringFormat='{0}'}" />
-                                            <Grid Padding="0, 10, 0, 0" BackgroundColor="Transparent" Margin="0" >
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition />
-                                                    <ColumnDefinition Width="0.2*"/>
-                                                    <ColumnDefinition  />
-                                                </Grid.ColumnDefinitions>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-                                                <StackLayout Spacing="5" BackgroundColor="Transparent" Grid.Column="0" Grid.Row="0" Orientation="Horizontal" HorizontalOptions="Start">
-                                                    <Image BackgroundColor="Transparent" HeightRequest="15" Source="{local:EmbeddedImage fileName=location_checkin.png}" Aspect="AspectFit" />
-                                                    <Label FontFamily="RajBold" HeightRequest="25" HorizontalOptions="StartAndExpand" VerticalTextAlignment="Center" FontSize="{markups:OnScreenSize DefaultSize='10' , Small='8', Medium='9',  ExtraSmall='8'}" Text="{Binding CityFrom, StringFormat='{0}'}" />
-                                                </StackLayout>
-                                                <Image Grid.Column="0" HeightRequest="5" VerticalOptions="StartAndExpand" Grid.ColumnSpan="3" Grid.Row="1" BackgroundColor="Transparent" Source="{local:EmbeddedImage fileName=line_route.png}" Aspect="AspectFit" />
-                                                <StackLayout Spacing="5" BackgroundColor="Transparent" Grid.Column="2" Grid.Row="0" Orientation="Horizontal" HorizontalOptions="End">
-                                                    <Label FontFamily="RajBold" HorizontalOptions="End" HorizontalTextAlignment="End" VerticalTextAlignment="Center" FontSize="{markups:OnScreenSize DefaultSize='10' , Small='8', Medium='9',  ExtraSmall='8'}"  Text="{Binding CityTo, StringFormat='{0}'}" />
-                                                    <Image BackgroundColor="Transparent" HeightRequest="15" Source="{local:EmbeddedImage fileName=location_checkin.png}" Aspect="AspectFit" />
-                                                </StackLayout>
-                                            </Grid>
-                                        </StackLayout>
-                                        <Grid Margin="10, 5, 10, 5" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" BackgroundColor="Transparent">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition />
-                                                <ColumnDefinition />
-                                                <ColumnDefinition  />
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition />
-                                            </Grid.RowDefinitions>
-                                            <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand" VerticalOptions="CenterAndExpand" Grid.Column="0" Grid.ColumnSpan="2">
-                                                <Frame HeightRequest="14" VerticalOptions="Start"
+                    <Grid Padding="0, 10, 0, 0" BackgroundColor="Transparent" Margin="0" >
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="0.2*"/>
+                        <ColumnDefinition  />
+                      </Grid.ColumnDefinitions>
+                      <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                      </Grid.RowDefinitions>
+                      <StackLayout Spacing="5" BackgroundColor="Transparent" Grid.Column="0" Grid.Row="0" Orientation="Horizontal" HorizontalOptions="Start">
+                        <Image BackgroundColor="Transparent" HeightRequest="15" Source="{local:EmbeddedImage fileName=location_checkin.png}" Aspect="AspectFit" />
+                        <Label FontFamily="RajBold" HeightRequest="25" HorizontalOptions="StartAndExpand" VerticalTextAlignment="Center" FontSize="{markups:OnScreenSize DefaultSize='10' , Small='8', Medium='9',  ExtraSmall='8'}" Text="{Binding CityFrom, StringFormat='{0}'}" />
+                      </StackLayout>
+                      <Image Grid.Column="0" HeightRequest="5" VerticalOptions="StartAndExpand" Grid.ColumnSpan="3" Grid.Row="1" BackgroundColor="Transparent" Source="{local:EmbeddedImage fileName=line_route.png}" Aspect="AspectFit" />
+                      <StackLayout Spacing="5" BackgroundColor="Transparent" Grid.Column="2" Grid.Row="0" Orientation="Horizontal" HorizontalOptions="End">
+                        <Label FontFamily="RajBold" HorizontalOptions="End" HorizontalTextAlignment="End" VerticalTextAlignment="Center" FontSize="{markups:OnScreenSize DefaultSize='10' , Small='8', Medium='9',  ExtraSmall='8'}"  Text="{Binding CityTo, StringFormat='{0}'}" />
+                        <Image BackgroundColor="Transparent" HeightRequest="15" Source="{local:EmbeddedImage fileName=location_checkin.png}" Aspect="AspectFit" />
+                      </StackLayout>
+                    </Grid>
+                  </StackLayout>
+                  <Grid Margin="10, 5, 10, 5" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" BackgroundColor="Transparent">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition />
+                      <ColumnDefinition />
+                      <ColumnDefinition  />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand" VerticalOptions="CenterAndExpand" Grid.Column="0" Grid.ColumnSpan="2">
+                      <Frame HeightRequest="14" VerticalOptions="Start"
                WidthRequest="20"
                CornerRadius="10"
                HorizontalOptions="Start"
@@ -135,51 +135,51 @@
                Padding="0"
                BorderColor="Gray"
                Margin="0,0,3,0">
-                                                    <Image BackgroundColor="Transparent" HorizontalOptions="Center" HeightRequest="20" WidthRequest="20" Margin="0" Source="{Binding UserProfilePhotoImg}" Aspect="AspectFill"/>
+                        <Image BackgroundColor="Transparent" HorizontalOptions="Center" HeightRequest="20" WidthRequest="20" Margin="0" Source="{Binding UserProfilePhotoImg}" Aspect="AspectFill"/>
 
-                                                </Frame>
-                                                <Label FontSize="{markups:OnScreenSize DefaultSize='10' , Small='8', Medium='9',  ExtraSmall='8'}" TextColor="#44394a" FontFamily="RajSemiBold" VerticalOptions="Center" Margin="0" BackgroundColor="Transparent" Text="{Binding UserName}" />
-                                            </StackLayout>
-                                            <StackLayout Margin="0, 0, 0, 0" BackgroundColor="Transparent" Orientation="Horizontal" HorizontalOptions="EndAndExpand" VerticalOptions="Center" Grid.Column="1" Grid.ColumnSpan="3">
-                                                <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar1}" Aspect="AspectFit" />
-                                                <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar2}" Aspect="AspectFit" />
-                                                <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar3}" Aspect="AspectFit" />
-                                                <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar4}" Aspect="AspectFit" />
-                                                <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar5}" Aspect="AspectFit" />
-                                            </StackLayout>
-                                        </Grid>
-                                    </Grid>
-                                    <utils:NeatFrame.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
+                      </Frame>
+                      <Label FontSize="{markups:OnScreenSize DefaultSize='10' , Small='8', Medium='9',  ExtraSmall='8'}" TextColor="#44394a" FontFamily="RajSemiBold" VerticalOptions="Center" Margin="0" BackgroundColor="Transparent" Text="{Binding UserName}" />
+                    </StackLayout>
+                    <StackLayout Margin="0, 0, 0, 0" BackgroundColor="Transparent" Orientation="Horizontal" HorizontalOptions="EndAndExpand" VerticalOptions="Center" Grid.Column="1" Grid.ColumnSpan="3">
+                      <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar1}" Aspect="AspectFit" />
+                      <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar2}" Aspect="AspectFit" />
+                      <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar3}" Aspect="AspectFit" />
+                      <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar4}" Aspect="AspectFit" />
+                      <Image HeightRequest="8" BackgroundColor="Transparent" Source="{Binding UserStar5}" Aspect="AspectFit" />
+                    </StackLayout>
+                  </Grid>
+                </Grid>
+                <utils:NeatFrame.GestureRecognizers>
+                  <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
 
-                                    </utils:NeatFrame.GestureRecognizers>
-                                </utils:NeatFrame>
-                            </ContentView>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                <CollectionView.Header>
-                    <Frame Padding="0" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,10,0,0" BackgroundColor="Transparent">
-                        <Grid ColumnDefinitions="auto,auto,auto">
-                            <Button x:FieldModifier="public" BackgroundColor="#fe4040" x:Name="Publicados2" Clicked="Button_Clicked" CornerRadius="0" HorizontalOptions="Fill" Text="Mis ofertas"></Button>
-                            <Rectangle Fill="Black" HorizontalOptions="Center" ZIndex="2" Grid.Column="0" WidthRequest="2" Margin="0,5,0,5" Grid.ColumnSpan="2"></Rectangle>
-              <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="En_Ruta2" Clicked="Button_Clicked" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="En Ruta" Grid.Column="1"></Button>
-                            <Rectangle Fill="Black" HorizontalOptions="Center" Grid.Column="1" WidthRequest="2" Margin="0,5,0,5" ZIndex="2" Grid.ColumnSpan="2"></Rectangle>
-                            <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="Enviados2" Clicked="Button_Clicked_2" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="Entregados" Grid.Column="2"></Button>
-                        </Grid>
-                    </Frame>
-                </CollectionView.Header>
+                </utils:NeatFrame.GestureRecognizers>
+              </utils:NeatFrame>
+            </ContentView>
+          </DataTemplate>
+        </CollectionView.ItemTemplate>
+        <CollectionView.Header>
+          <Frame Padding="0" HorizontalOptions="Center" VerticalOptions="Start" Margin="0,10,0,0" BackgroundColor="Transparent">
+            <Grid ColumnDefinitions="auto,auto,auto">
+              <Button x:FieldModifier="public" BackgroundColor="#fe4040" x:Name="Publicados2" Clicked="Button_Clicked" CornerRadius="0" HorizontalOptions="Fill" Text="Mis ofertas"></Button>
+              <Rectangle Fill="Black" HorizontalOptions="Center" ZIndex="2" Grid.Column="0" WidthRequest="2" Margin="0,5,0,5" Grid.ColumnSpan="2"></Rectangle>
+              <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="En_Ruta2" Clicked="Button_Clicked_1" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="En Rutaiiiii" Grid.Column="1"></Button>
+              <Rectangle Fill="Black" HorizontalOptions="Center" Grid.Column="1" WidthRequest="2" Margin="0,5,0,5" ZIndex="2" Grid.ColumnSpan="2"></Rectangle>
+              <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="Enviados2" Clicked="Button_Clicked_2" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="Entregados" Grid.Column="2"></Button>
+            </Grid>
+          </Frame>
+        </CollectionView.Header>
 
-                <CollectionView.Footer>
-                    <controls:LoadingSmall 
+        <CollectionView.Footer>
+          <controls:LoadingSmall 
                 IsVisible="True"
                     VerticalOptions="StartAndExpand"
                     BackgroundColor="Transparent" HeightRequest="70" x:Name="SmallLoading1">
-                        </controls:LoadingSmall>
-                    </CollectionView.Footer>
+          </controls:LoadingSmall>
+        </CollectionView.Footer>
 
-                  
 
-                </CollectionView>
+
+      </CollectionView>
       <!-- CollectionView for Mis Ofertas tab (En Ruta) -->
 
       <CollectionView
@@ -582,13 +582,14 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
             <Grid ColumnDefinitions="auto,auto,auto">
               <Button x:FieldModifier="public" BackgroundColor="#fe4040" x:Name="Publicados" Clicked="Button_Clicked" CornerRadius="0" HorizontalOptions="Fill" Text="Mis ofertas"></Button>
               <Rectangle Fill="Black" HorizontalOptions="Center" ZIndex="2" Grid.Column="0" WidthRequest="2" Margin="0,5,0,5" Grid.ColumnSpan="2"></Rectangle>
-              <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="En_Ruta" Clicked="Button_Clicked_1" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="En Ruta" Grid.Column="1"></Button>
+              <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="En_Ruta" Clicked="Button_Clicked_1" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="En Rutaaaa" Grid.Column="1"></Button>
               <Rectangle Fill="Black" HorizontalOptions="Center" Grid.Column="1" WidthRequest="2" Margin="0,5,0,5" ZIndex="2" Grid.ColumnSpan="2"></Rectangle>
               <Button x:FieldModifier="public" BackgroundColor="#c3c3c3" x:Name="Enviados" Clicked="Button_Clicked_2" CornerRadius="0" HorizontalOptions="FillAndExpand" Text="Entregados" Grid.Column="2"></Button>
             </Grid>
           </Frame>
         </CollectionView.Header>
 
+        <!-- TEMPORARILY COMMENTED OUT: EmptyView to debug offers loading
         <CollectionView.EmptyView>
           <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" Padding="20">
             <utils:NeatFrame CornerRadius="15"
@@ -617,31 +618,32 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
             </utils:NeatFrame>
           </StackLayout>
         </CollectionView.EmptyView>
+        -->
       </CollectionView>
-          
+
       <!-- ContentView for Entregados tab -->
-            <ContentView x:Name="Entregados" IsVisible="False" Margin="0,155,0,0" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
+      <ContentView x:Name="Entregados" IsVisible="False" Margin="0,155,0,0" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
 
 
 
-  
-            
-            </ContentView>
-            
-            <Grid x:Name="grid_context" Margin="0,0,0,0" AbsoluteLayout.LayoutBounds="0,0,1,0.09" AbsoluteLayout.LayoutFlags="All" BackgroundColor="Transparent">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="100"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-            </Grid>
-            <utils:NeatFrame AbsoluteLayout.LayoutBounds="0,0,0.13,0.08" AbsoluteLayout.LayoutFlags="All"
+
+
+      </ContentView>
+
+      <Grid x:Name="grid_context" Margin="0,0,0,0" AbsoluteLayout.LayoutBounds="0,0,1,0.09" AbsoluteLayout.LayoutFlags="All" BackgroundColor="Transparent">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition/>
+          <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+      </Grid>
+      <utils:NeatFrame AbsoluteLayout.LayoutBounds="0,0,0.13,0.08" AbsoluteLayout.LayoutFlags="All"
                    Padding="0" Margin="0" CornerRadius="25"
                    BorderColor="Transparent"
                    BackgroundColor="Transparent">
-                <Image
+        <Image
                     x:Name="menu_context"
                     VerticalOptions="CenterAndExpand"
                     HorizontalOptions="StartAndExpand"
@@ -650,23 +652,23 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
                     HeightRequest="12"
                     Aspect="AspectFit"
                     >
-                    <Image.Margin>
-                        <OnPlatform x:TypeArguments="Thickness">
-                            <OnPlatform.Platforms>
-                                <On Platform="iOS" Value="20, 0, 0, 0" />
-                                <On Platform="Android" Value="20, 0, 0, 0" />
-                                <On Platform="UWP" Value="20, 0, 0, 0" />
-                            </OnPlatform.Platforms>
-                        </OnPlatform>
-                    </Image.Margin>
-                </Image>
-                <utils:NeatFrame.GestureRecognizers>
-                    <TapGestureRecognizer
+          <Image.Margin>
+            <OnPlatform x:TypeArguments="Thickness">
+              <OnPlatform.Platforms>
+                <On Platform="iOS" Value="20, 0, 0, 0" />
+                <On Platform="Android" Value="20, 0, 0, 0" />
+                <On Platform="UWP" Value="20, 0, 0, 0" />
+              </OnPlatform.Platforms>
+            </OnPlatform>
+          </Image.Margin>
+        </Image>
+        <utils:NeatFrame.GestureRecognizers>
+          <TapGestureRecognizer
                              Tapped="Backward"
                              NumberOfTapsRequired="1" />
-                </utils:NeatFrame.GestureRecognizers>
-            </utils:NeatFrame>
-            <Label
+        </utils:NeatFrame.GestureRecognizers>
+      </utils:NeatFrame>
+      <Label
                 AbsoluteLayout.LayoutBounds="0,0.08,1,0.09" AbsoluteLayout.LayoutFlags="All"
                 x:Name="hello_context"
                 Text="Mis Repartos,"
@@ -678,30 +680,30 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
                 TextColor="#b4b4b1"
                 FontFamily="RajBold"
                 >
-                <Label.Margin>
-                    <OnPlatform x:TypeArguments="Thickness">
-                        <OnPlatform.Platforms>
-                            <On Platform="iOS" Value="0, 0, 20, 0" />
-                            <On Platform="Android" Value="0, 40, 0, 0" />
-                            <On Platform="UWP" Value="0, 0, 40, 0" />
-                        </OnPlatform.Platforms>
-                    </OnPlatform>
-                </Label.Margin>
-            </Label>
-            <Grid AbsoluteLayout.LayoutBounds="0, 1, 1, AutoSize" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional"
+        <Label.Margin>
+          <OnPlatform x:TypeArguments="Thickness">
+            <OnPlatform.Platforms>
+              <On Platform="iOS" Value="0, 0, 20, 0" />
+              <On Platform="Android" Value="0, 40, 0, 0" />
+              <On Platform="UWP" Value="0, 0, 40, 0" />
+            </OnPlatform.Platforms>
+          </OnPlatform>
+        </Label.Margin>
+      </Label>
+      <Grid AbsoluteLayout.LayoutBounds="0, 1, 1, AutoSize" AbsoluteLayout.LayoutFlags="YProportional,WidthProportional"
                          VerticalOptions="CenterAndExpand" BackgroundColor="Transparent">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Border 
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Border 
                     Margin="0, 10, 0, 0"
                     BackgroundColor="LightGray"  Padding="10, 15, 10, 15" Grid.Column="0">
-                    <Image
+          <Image
                         x:Name="menu_context2"                   
                         Margin="20,0,10,0"                       
                         VerticalOptions="CenterAndExpand"
@@ -712,23 +714,23 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
                         WidthRequest="20"
                         Aspect="AspectFit"
                         >
-                    </Image>
-                    <Border.StrokeShape>
-                        <RoundRectangle   CornerRadius="0,25,0,0"/>
+          </Image>
+          <Border.StrokeShape>
+            <RoundRectangle   CornerRadius="0,25,0,0"/>
 
-                    </Border.StrokeShape>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer
+          </Border.StrokeShape>
+          <Border.GestureRecognizers>
+            <TapGestureRecognizer
                                 Tapped="GoToInbox"
                                 NumberOfTapsRequired="1" />
-                    </Border.GestureRecognizers>
-                </Border>
-                <Border 
+          </Border.GestureRecognizers>
+        </Border>
+        <Border 
                     x:Name="help_context"
                     HorizontalOptions="EndAndExpand"
                     Margin="0, 0, 0, 10"
                     BackgroundColor="LightGray"  Padding="10, 12.5, 10, 12.5" Grid.Column="2">
-                    <Image
+          <Image
                         x:Name="help_image_context"
                         Margin="10,0,10,0"
                         VerticalOptions="CenterAndExpand"
@@ -739,18 +741,18 @@ RemainingItemsThresholdReachedCommand="{Binding LoadMoreCommand}"
                         WidthRequest="25"
                         Aspect="AspectFit"
                         >
-                    </Image>
-                    <Border.StrokeShape>
-                        <RoundRectangle   CornerRadius="25,0,25,0"/>
+          </Image>
+          <Border.StrokeShape>
+            <RoundRectangle   CornerRadius="25,0,25,0"/>
 
-                    </Border.StrokeShape>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer
+          </Border.StrokeShape>
+          <Border.GestureRecognizers>
+            <TapGestureRecognizer
                                 Tapped="GoHelpPage"
                                 NumberOfTapsRequired="1" />
-                    </Border.GestureRecognizers>
-                </Border>
-            </Grid>
-        </AbsoluteLayout>
-    </ContentPage.Content>
+          </Border.GestureRecognizers>
+        </Border>
+      </Grid>
+    </AbsoluteLayout>
+  </ContentPage.Content>
 </ContentPage>

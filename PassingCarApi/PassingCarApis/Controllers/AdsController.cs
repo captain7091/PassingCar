@@ -1994,8 +1994,8 @@ namespace PassingCarApis.Controllers
 									a.Title, a.CreatedAt from Ads a
 									Where Id in (Select AdId from Offer Where UserId =  @UserId and UserProfile = @UserProfile)";
 
-
-                    IEnumerable<AdsParent> adsSentOffers = await connection.QueryAsync<AdsParent>(query, new { UserId = loggedUser.Id, UserProfile = loggedUser.Profile.ToString() });
+          var userprof = ((int)loggedUser.Profile);
+                    IEnumerable<AdsParent> adsSentOffers = await connection.QueryAsync<AdsParent>(query, new { UserId = loggedUser.Id, UserProfile = ((int)loggedUser.Profile)});
                     if (adsSentOffers != null && adsSentOffers.Count() > 0)
                     {
                         query = @$"Select  o.Id, o.Message as Price, o.State, o.CreatedAt
@@ -2006,7 +2006,7 @@ namespace PassingCarApis.Controllers
                                             where AdId = @AdsId AND u.Id = @UserId AND o.UserProfile = @UserProfile";
                         foreach (AdsParent item in adsSentOffers)
                         {
-                            item.SentOffers = (await connection.QueryAsync<OfferDetails>(query, new { item.AdsId, UserId = loggedUser.Id, UserProfile = loggedUser.Profile.ToString() })).ToList();
+                            item.SentOffers = (await connection.QueryAsync<OfferDetails>(query, new { item.AdsId, UserId = loggedUser.Id, UserProfile = ((int)loggedUser.Profile) })).ToList();
                             response.Ads.Add(item);
                         }
                     }

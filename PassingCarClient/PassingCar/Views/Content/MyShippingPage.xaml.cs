@@ -102,81 +102,66 @@ namespace PassingCar.Views
             {
                 System.Diagnostics.Debug.WriteLine($"[MyShippingPage] LoadMisOfertasTabData called - loading offers for sender");
                 
-                // Call GetMyOffers API (for senders to see offers on their ads)
-                GetOffersResponse response = await Api.GetMyOffers();
+                // Call GetMyOffersAds API (returns complete ad details)
+                GetNextAdsResponse response = await Api.GetMyOffersAds();
                 
-                if (response != null && response.Success && response.Ads != null)
+                if (response != null && response.Success && response.AdsItem != null)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffers API returned {response.Ads.Count()} ads with offers for Mis Ofertas tab");
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffersAds API returned {response.AdsItem.Count()} ads with offers for Mis Ofertas tab");
                     
-                    // Create a temporary loading control for offers display
+                    // Create a temporary loading control
                     var tempLoading = new LoadingSmall();
                     
-                    // Create a new ListOffersViewModel for offers display
-                    var offersViewModel = new ListOffersViewModel();
+                    // Create a new ListAdsViewModel for offers display (uses AdsDetailsExtened which matches XAML)
+                    var adsViewModel = new ListAdsViewModel(tempLoading);
                     
-                    // Clear existing offers
-                    offersViewModel.Ads.Clear();
+                    // Clear existing ads
+                    adsViewModel.Adss.Clear();
                     
-                    // Convert API response to local offers and populate the UI
-                    foreach (var item in response.Ads)
+                    // Convert API response to AdsDetailsExtened and populate the UI
+                    foreach (var item in response.AdsItem)
                     {
-                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Processing ad with offers: {item.Title}, AdsId: {item.AdsId}");
+                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Processing ad with offers: {item.AdsTitle}, AdsId: {item.AdsId}");
                         
-                        var adsParentExtended = new AdsParentExtended()
+                        var adDetails = new AdsDetailsExtened(false)
                         {
+                            FirstAdsImage = item.FirstAdsImage,
+                            AdsTitle = item.AdsTitle,
+                            IsFavorite = item.IsFavorite,
                             AdsId = item.AdsId,
-                            CreatedAt = item.CreatedAt,
-                            ChatIdForViewer = item.ChatIdForViewer,
-                            FirstPhoto = item.FirstPhoto,
-                            OffersGroupEx = new ObservableCollection<GroupOffersDetailsExtended>(),
-                            SentOffersEx = new ObservableCollection<OfferDetailsExtended>(),
-                            Title = item.Title
+                            AdsFrom = item.AdsFrom,
+                            AdsTo = item.AdsTo,
+                            AdsPrice = item.AdsPrice,
+                            State = item.State.Espana(),
+                            UserProfilePhoto = item.UserProfilePhoto,
+                            UserName = item.UserName,
+                            UserRating = item.UserRating,
+                            PostedTime = item.PostedTime,
+                            UserId = item.UserId,
+                            UserProfile = item.UserProfile,
+                            ModifiedAt = item.ModifiedAt,
                         };
                         
-                        // Load the first photo for the ad
-                        adsParentExtended.FirstPhoto = await adsParentExtended.AdsId.GetAdsPhoto();
+                        adsViewModel.Adss.Add(adDetails);
                         
-                        // Convert offers groups
-                        if (item.OffersGroups != null && item.OffersGroups.Count > 0)
-                        {
-                            foreach (var group in item.OffersGroups)
-                            {
-                                var groupExtended = new GroupOffersDetailsExtended(group, null);
-                                adsParentExtended.OffersGroupEx.Add(groupExtended);
-                            }
-                        }
-                        
-                        // Convert sent offers
-                        if (item.SentOffers != null && item.SentOffers.Count > 0)
-                        {
-                            foreach (var sentOffer in item.SentOffers)
-                            {
-                                var sentOfferExtended = new OfferDetailsExtended(sentOffer, null);
-                                adsParentExtended.SentOffersEx.Add(sentOfferExtended);
-                            }
-                        }
-                        
-                        offersViewModel.Ads.Add(adsParentExtended);
-                        
-                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Added ad with offers to viewmodel: {adsParentExtended.Title}, Count: {offersViewModel.Ads.Count}");
+                        System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Added ad to viewmodel: {adDetails.AdsTitle}, Count: {adsViewModel.Adss.Count}");
                     }
                     
-                    // Set the binding context to show offers in collectionview_ads
-                    collectionview_ads.BindingContext = offersViewModel;
+                    // Set the binding context to show ads in collectionview_ads
+                    collectionview_ads.BindingContext = adsViewModel;
                     collectionview_ads.IsVisible = true;
                     
-                    // Keep collectionview_shippings visible but empty so tabs remain visible
+                    // Keep collectionview_shippings visible (for tabs) but empty
                     ShippingsLibrary.Shippingss.Clear();
                     collectionview_shippings.IsVisible = true;
                     Entregados.IsVisible = false;
                     
-                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Successfully loaded {offersViewModel.Ads.Count} ads with offers into Mis Ofertas tab");
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] Successfully loaded {adsViewModel.Adss.Count} ads with offers into Mis Ofertas tab");
                     System.Diagnostics.Debug.WriteLine($"[MyShippingPage] CollectionView_ads Visible: {collectionview_ads.IsVisible}");
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffers API failed: Success={response?.Success}, Error='{response?.ErrorMessage}'");
+                    System.Diagnostics.Debug.WriteLine($"[MyShippingPage] GetMyOffersAds API failed: Success={response?.Success}, Error='{response?.ErrorMessage}'");
                     // Show empty state or error message
                     collectionview_ads.IsVisible = true;
                     ShippingsLibrary.Shippingss.Clear();
