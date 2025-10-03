@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
     BackgroundColor="White"
     Padding="0"
@@ -791,6 +791,28 @@
                                                         VerticalOptions="CenterAndExpand" />
                                                 </StackLayout>
                                             </Grid>
+                                        </StackLayout>
+                                        <!-- Delete Ad Button -->
+                                        <StackLayout
+                                            BackgroundColor="Transparent"
+                                            HorizontalOptions="Center"
+                                            Margin="0,10,0,0"
+                                            Padding="20,10,20,10">
+                                            <Button
+                                                BackgroundColor="#ff1823"
+                                                Command="{Binding DeleteAdCommand}"
+                                                CornerRadius="5"
+                                                FontFamily="RajSemiBold"
+                                                FontSize="{markups:OnScreenSize DefaultSize='14',
+                                                                                Small='12',
+                                                                                Medium='12',
+                                                                                ExtraSmall='10'}"
+                                                HeightRequest="40"
+                                                HorizontalOptions="Center"
+                                                Text="Delete Ad"
+                                                TextColor="#ffffff"
+                                                VerticalOptions="Center"
+                                                WidthRequest="200" />
                                         </StackLayout>
                                         <Grid>
                                             <Label

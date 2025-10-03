@@ -109,13 +109,7 @@ namespace PassingCar.ViewModels
             {
                 _ = ex.Handle();
             }
-        }
-
-
-
-
-      
-
+        }  
         public async Task CustomLoad(AdsFilter filter)
         {
             try

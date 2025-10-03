@@ -111,11 +111,30 @@ namespace PassingCar.LocalDatabase
         {
             try
             {
+                // Get current logged-in user ID
+                int loggedUser = App.CurrentUser?.Id ?? 0;
+                if (loggedUser <= 0)
+                {
+                    // Fallback to API if App.CurrentUser is not set
+                    try
+                    {
+                        loggedUser = await Api.GetUserId();
+                    }
+                    catch (Exception apiEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[LocalDB] Failed to get user ID from API: {apiEx.Message}");
+                        return new List<LocalAd>();
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[LocalDB] GetAdsForCheck: Filtering ads for user ID: {loggedUser}");
+
                 List<LocalAd> allads = await _localDB.Table<LocalAd>().ToListAsync();
                 // FIXED: Filter out ads with state >= 3 (AcceptedForTransit and above) - these are ads where payment has been completed
-                List<LocalAd> ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.AcceptedForTransit).ToListAsync();
+                // AND filter by current user ID
+                List<LocalAd> ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.AcceptedForTransit && a.UserId == loggedUser).ToListAsync();
 
-                System.Diagnostics.Debug.WriteLine($"[LocalDB] GetAdsForCheck: Found {allads.Count} total ads, {ads.Count} active ads (excluding paid ads)");
+                System.Diagnostics.Debug.WriteLine($"[LocalDB] GetAdsForCheck: Found {allads.Count} total ads, {ads.Count} active ads for user {loggedUser} (excluding paid ads)");
 
                 // CRITICAL FIX: Always try to load new ads from API, especially if database is empty
                 bool loadedNewAds = await GetNewAds(GetMaxId(allads), adsFilter);
@@ -123,15 +142,15 @@ namespace PassingCar.LocalDatabase
                 
                 if (loadedNewAds)
                 {
-                    // Refresh ads from database after API call - still filter out paid ads
-                    ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.AcceptedForTransit).ToListAsync();
-                    System.Diagnostics.Debug.WriteLine($"[LocalDB] After API call: {ads.Count} active ads in database (excluding paid ads)");
+                    // Refresh ads from database after API call - still filter out paid ads and by user ID
+                    ads = await _localDB.Table<LocalAd>().Where(a => a.State < Models.AdsState.AcceptedForTransit && a.UserId == loggedUser).ToListAsync();
+                    System.Diagnostics.Debug.WriteLine($"[LocalDB] After API call: {ads.Count} active ads for user {loggedUser} in database (excluding paid ads)");
                 }
 
                 // CRITICAL FIX: Always filter out test ads now that we've removed test ad creation
                 // Real ads should be loaded from the API
                 ads = FilterOutTestAds(ads);
-                System.Diagnostics.Debug.WriteLine($"[LocalDB] After filtering test ads: {ads.Count} real ads remain (excluding paid ads)");
+                System.Diagnostics.Debug.WriteLine($"[LocalDB] After filtering test ads: {ads.Count} real ads remain for user {loggedUser} (excluding paid ads)");
 
                 return await GetFiltered(ads, adsFilter);
             }
